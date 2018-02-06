@@ -1,0 +1,13 @@
+[
+    {
+        "modid": "carpentrycubes",
+        "name": "Carpentry Cubes",
+        "description": "I can't believe its not ArchitectureCraft!",
+        "version": "@VERSION@",
+        "logoFile": "assets/examplemod/textures/logo.png",
+        "url": "https://github.com/elytra/CarpentersCubes",
+        "authorList": [
+            "darkevilmac"
+        ]
+    }
+]

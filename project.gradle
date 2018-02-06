@@ -1,0 +1,48 @@
+// See https://github.com/elytra/Skeleton/wiki for what all these values mean
+
+ext {
+    group = 'com.elytradev'
+    projectName = 'capentrycubes'
+
+    useElytraVersionFormat = true
+    version = '0'
+
+    concreteVersion = '0.3.2-SNAPSHOT'
+    concreteModules = ['all']
+
+    coremod = null
+    miniVersion = null
+
+    language = 'java'
+
+    forge = '1.12.2-14.23.2.2612'
+    mappings = 'snapshot_20180206'
+
+    enforceLicenseHeaders = false
+
+    verbose = false
+}
+
+if (!ext.early) {
+    repositories {
+        // the skeleton already defines mavenCentral, jcenter, and the Elytra repo
+        // will also have Shadowfacts' maven if the language is set to kotlin
+        maven {
+            // location of the maven that hosts JEI files
+            name = "Progwml6 maven"
+            url = "http://dvs1.progwml6.com/files/maven"
+        }
+        maven {
+            // location of a maven mirror for JEI files, as a fallback
+            name = "ModMaven"
+            url = "modmaven.k-4u.nl"
+        }
+    }
+
+    dependencies {
+        deobfCompile "com.elytradev:probedataproviderapi:MC1.12_ver1.1.1"
+
+        deobfProvided "mezz.jei:jei_1.12.2:4.7.10.98:api"
+        runtime "mezz.jei:jei_1.12.2:4.7.10.98"
+    }
+}
