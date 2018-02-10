@@ -1,5 +1,6 @@
 package com.elytradev.carpentrycubes.client.proxy;
 
+import com.elytradev.carpentrycubes.client.render.CarpentersModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
 import com.elytradev.carpentrycubes.common.proxy.CommonProxy;
@@ -12,6 +13,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -61,6 +63,7 @@ public class ClientProxy extends CommonProxy {
 
     @SubscribeEvent
     public void onModelRegistryEvent(ModelRegistryEvent event) {
+        ModelLoaderRegistry.registerLoader(new CarpentersModelLoader());
     }
 
 }

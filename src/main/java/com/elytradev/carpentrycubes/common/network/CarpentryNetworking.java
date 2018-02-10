@@ -9,7 +9,7 @@ public class CarpentryNetworking {
     public static final NetworkContext NETWORK = NetworkContext.forChannel(CarpentryMod.MOD_ID);
 
     public static void setupNetwork() {
-        // register packets here
+        registerMessage(TileUpdateMessage.class);
     }
 
     private static void registerMessage(Class<? extends Message> clazz) {

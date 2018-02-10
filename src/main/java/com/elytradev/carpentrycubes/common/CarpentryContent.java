@@ -1,6 +1,9 @@
 package com.elytradev.carpentrycubes.common;
 
+import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -14,6 +17,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -30,9 +34,9 @@ public class CarpentryContent {
     public static HashMap<String, Item> registeredItems;
     public static List<Object> skipItemMesh;
     public static String REGISTRY_PREFIX = MOD_ID.toLowerCase();
+    public static BlockCarpentry blockSlope;
     private static List<Item> itemBlocksToRegister;
     private int recipeID = 0;
-
     private CreativeTabs creativeTab = new CreativeTabs(CarpentryMod.MOD_ID) {
         @Override
         public ItemStack getTabIconItem() {
@@ -45,11 +49,11 @@ public class CarpentryContent {
     }
 
     public void preInit(FMLPreInitializationEvent e) {
-
     }
 
     public void init(FMLInitializationEvent e) {
         // register tiles
+        GameRegistry.registerTileEntity(TileCarpentry.class, REGISTRY_PREFIX + ":" + "tileCarpentry");
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -65,6 +69,9 @@ public class CarpentryContent {
         IForgeRegistry<Block> registry = event.getRegistry();
         registeredBlocks = new HashMap<>();
         itemBlocksToRegister = new ArrayList<>();
+
+        blockSlope = new BlockCarpentry(Material.WOOD);
+        registerBlock(registry, "carpentrySlope", blockSlope, true);
     }
 
     @SubscribeEvent
@@ -72,6 +79,7 @@ public class CarpentryContent {
         IForgeRegistry<Item> registry = event.getRegistry();
         registeredItems = new HashMap<>();
         skipItemMesh = new ArrayList<>();
+        itemBlocksToRegister.forEach(registry::register);
     }
 
     private void registerShapedRecipe(IForgeRegistry<IRecipe> registry, ItemStack out, Object... input) {
@@ -89,7 +97,7 @@ public class CarpentryContent {
     }
 
     private void registerBlock(IForgeRegistry<Block> registry, String id, Block block, boolean withItemBlock) {
-        block.setUnlocalizedName("teckle." + id);
+        block.setUnlocalizedName("carpentrycubes." + id);
         block.setRegistryName(REGISTRY_PREFIX, id);
         block.setCreativeTab(creativeTab);
         registry.register(block);
@@ -100,7 +108,7 @@ public class CarpentryContent {
 
     private void registerBlock(IForgeRegistry<Block> registry, String id, Block block, Class<? extends ItemBlock> itemBlockClass) {
         try {
-            block.setUnlocalizedName("teckle." + id);
+            block.setUnlocalizedName("carpentrycubes." + id);
             block.setRegistryName(REGISTRY_PREFIX, id);
             registry.register(block);
 
@@ -115,7 +123,7 @@ public class CarpentryContent {
     }
 
     private void registerItem(IForgeRegistry<Item> registry, String id, Item item) {
-        item.setUnlocalizedName("teckle." + id);
+        item.setUnlocalizedName("carpentrycubes." + id);
         item.setRegistryName(REGISTRY_PREFIX, id);
         item.setCreativeTab(creativeTab);
         registry.register(item);
