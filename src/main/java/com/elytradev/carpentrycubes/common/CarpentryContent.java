@@ -1,6 +1,6 @@
 package com.elytradev.carpentrycubes.common;
 
-import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
+import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -34,7 +34,7 @@ public class CarpentryContent {
     public static HashMap<String, Item> registeredItems;
     public static List<Object> skipItemMesh;
     public static String REGISTRY_PREFIX = MOD_ID.toLowerCase();
-    public static BlockCarpentry blockSlope;
+    public static BlockCarpentrySlope blockSlope;
     private static List<Item> itemBlocksToRegister;
     private int recipeID = 0;
     private CreativeTabs creativeTab = new CreativeTabs(CarpentryMod.MOD_ID) {
@@ -70,7 +70,7 @@ public class CarpentryContent {
         registeredBlocks = new HashMap<>();
         itemBlocksToRegister = new ArrayList<>();
 
-        blockSlope = new BlockCarpentry(Material.WOOD);
+        blockSlope = new BlockCarpentrySlope(Material.WOOD);
         registerBlock(registry, "carpentrySlope", blockSlope, true);
     }
 

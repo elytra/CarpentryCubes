@@ -1,6 +1,6 @@
 package com.elytradev.carpentrycubes.client.proxy;
 
-import com.elytradev.carpentrycubes.client.render.CarpentersModelLoader;
+import com.elytradev.carpentrycubes.client.render.model.CarpentryModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
 import com.elytradev.carpentrycubes.common.proxy.CommonProxy;
@@ -63,7 +63,7 @@ public class ClientProxy extends CommonProxy {
 
     @SubscribeEvent
     public void onModelRegistryEvent(ModelRegistryEvent event) {
-        ModelLoaderRegistry.registerLoader(new CarpentersModelLoader());
+        ModelLoaderRegistry.registerLoader(new CarpentryModelLoader());
     }
 
 }

@@ -1,5 +1,6 @@
-package com.elytradev.carpentrycubes.client.render;
+package com.elytradev.carpentrycubes.client.render.model;
 
+import com.elytradev.carpentrycubes.client.render.QuadBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -14,7 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CarpentersModelData {
+/**
+ * Stores quad info that can be modified with given transforms, tintindices, and face sprites.
+ */
+public class CarpentryModelData {
 
     private final Map<EnumFacing, float[][][]> masterData = Arrays.stream(EnumFacing.values()).collect(Collectors.toMap(e -> e, e -> new float[0][0][0]));
 
@@ -34,15 +38,24 @@ public class CarpentersModelData {
     public ModelDataQuads buildModel() {
         List<BakedQuad> generalQuads = Lists.newArrayList();
         Map<EnumFacing, List<BakedQuad>> faceQuads = Maps.newHashMap();
+
+        Map<EnumFacing, float[][][]> transformedMasterData = Maps.newHashMap();
+
+        for (Map.Entry<EnumFacing, float[][][]> entry : masterData.entrySet()) {
+            EnumFacing newFace = transform.rotate(entry.getKey());
+            transformedMasterData.putIfAbsent(newFace, entry.getValue());
+        }
+
         for (int faceIndex = 0; faceIndex < faceSprites.length; faceIndex++) {
             EnumFacing face = EnumFacing.values()[faceIndex];
+            EnumFacing newFace = transform.rotate(face);
             TextureAtlasSprite sprite = faceSprites[faceIndex];
             int tintIndex = tintIndices[faceIndex];
             float[][][] rawQuads = masterData.get(face);
-            faceQuads.putIfAbsent(face, Lists.newArrayList());
+            faceQuads.putIfAbsent(newFace, Lists.newArrayList());
 
             for (int quad = 0; quad < rawQuads.length; quad++) {
-                QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, face, tintIndex);
+                QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, newFace, tintIndex);
                 float[][] steps = rawQuads[quad];
 
                 for (int i = 0; i < steps.length; i++) {
@@ -54,7 +67,8 @@ public class CarpentersModelData {
                 }
                 BakedQuad builtQuad = quadBuilder.build();
                 generalQuads.add(builtQuad);
-                faceQuads.get(face).add(builtQuad);
+                faceQuads.get(newFace).add(builtQuad);
+
             }
         }
 
@@ -63,6 +77,7 @@ public class CarpentersModelData {
     }
 
     private void setup() {
+        // reset the model data for a new draw request.
         this.transform = TRSRTransformation.identity();
         this.tintIndices = new int[EnumFacing.values().length];
         this.faceSprites = new TextureAtlasSprite[EnumFacing.values().length];

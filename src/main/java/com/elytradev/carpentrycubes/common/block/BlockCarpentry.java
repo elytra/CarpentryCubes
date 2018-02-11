@@ -1,5 +1,8 @@
 package com.elytradev.carpentrycubes.common.block;
 
+import com.elytradev.carpentrycubes.client.render.model.ICarpentersModel;
+import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockAccessProperty;
+import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockPosProperty;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockStateProperty;
 import com.elytradev.carpentrycubes.common.network.TileUpdateMessage;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
@@ -29,6 +32,8 @@ import javax.annotation.Nullable;
 public class BlockCarpentry extends BlockContainer {
 
     public static final IUnlistedProperty<IBlockState> COVERSTATE = UnlistedBlockStateProperty.create("cover");
+    public static final IUnlistedProperty<IBlockAccess> BLOCK_ACCESS = UnlistedBlockAccessProperty.create("access");
+    public static final IUnlistedProperty<BlockPos> POS = UnlistedBlockPosProperty.create("pos");
 
     public BlockCarpentry(Material materialIn) {
         super(materialIn);
@@ -45,6 +50,8 @@ public class BlockCarpentry extends BlockContainer {
             ItemStack heldItem = playerIn.getHeldItem(hand);
             if (Block.getBlockFromItem(heldItem.getItem()) != Blocks.AIR && !playerIn.isSneaking()) {
                 Block block = Block.getBlockFromItem(heldItem.getItem());
+                if (block instanceof BlockCarpentry)
+                    return false;
                 tileCarpentry.setCoverState(block.getStateFromMeta(heldItem.getMetadata()));
                 new TileUpdateMessage(tileCarpentry).sendToAllWatching(tileCarpentry);
                 return true;
@@ -54,9 +61,13 @@ public class BlockCarpentry extends BlockContainer {
         return !playerIn.isSneaking();
     }
 
+    public ICarpentersModel<? extends BlockCarpentry> getModel() {
+        return null;
+    }
+
     @Override
     protected BlockStateContainer createBlockState() {
-        return new ExtendedBlockState(this, getProperties(), new IUnlistedProperty[]{COVERSTATE});
+        return new ExtendedBlockState(this, getProperties(), new IUnlistedProperty[]{COVERSTATE, BLOCK_ACCESS, POS});
     }
 
     @Override
@@ -68,7 +79,9 @@ public class BlockCarpentry extends BlockContainer {
     public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
         if (state instanceof IExtendedBlockState && world.getTileEntity(pos) instanceof TileCarpentry) {
             TileCarpentry tileCarpentry = (TileCarpentry) world.getTileEntity(pos);
-            state = ((IExtendedBlockState) state).withProperty(COVERSTATE, tileCarpentry.getCoverState());
+            state = ((IExtendedBlockState) state).withProperty(COVERSTATE, tileCarpentry.getCoverState())
+                    .withProperty(BLOCK_ACCESS, world)
+                    .withProperty(POS, pos);
         }
         return super.getExtendedState(state, world, pos);
     }
