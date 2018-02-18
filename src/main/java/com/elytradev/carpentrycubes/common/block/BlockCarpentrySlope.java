@@ -3,6 +3,7 @@ package com.elytradev.carpentrycubes.common.block;
 import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
 import com.elytradev.carpentrycubes.client.render.model.ICarpentersModel;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedEnumProperty;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.material.Material;
@@ -11,12 +12,15 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockCarpentrySlope extends BlockCarpentry {
 
@@ -72,5 +76,28 @@ public class BlockCarpentrySlope extends BlockCarpentry {
             state = ((IExtendedBlockState) state).withProperty(SHAPE, tileCarpentrySlope.getShape());
         }
         return state;
+    }
+
+    @Override
+    public boolean isFullBlock(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state) {
+        return false;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing side) {
+        if (access != null && pos != null) {
+            TileEntity tileEntity = access.getTileEntity(pos);
+            if (tileEntity instanceof TileCarpentry) {
+                TileCarpentry tileCarpentry = (TileCarpentry) tileEntity;
+                return tileCarpentry.getCoverState().getBlock().shouldSideBeRendered(tileCarpentry.getCoverState(), access, pos, side);
+            }
+        }
+
+        return super.shouldSideBeRendered(state, access, pos, side);
     }
 }

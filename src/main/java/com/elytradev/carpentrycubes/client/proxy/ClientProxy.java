@@ -11,8 +11,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -26,12 +28,8 @@ public class ClientProxy extends CommonProxy {
         }
 
         if (state == LoaderState.ModState.INITIALIZED) {
-            registerTileEntitySpecialRenderers();
             registerItemRenderers();
         }
-    }
-
-    public void registerTileEntitySpecialRenderers() {
     }
 
     public void registerItemRenderers() {
@@ -57,9 +55,13 @@ public class ClientProxy extends CommonProxy {
     }
 
     @SubscribeEvent
-    public void onModelBakeEvent(ModelBakeEvent e) {
-
+    public void onTextureStitch(TextureStitchEvent e) {
+        e.getMap().registerSprite(new ResourceLocation(CarpentryMod.MOD_ID, "blocks/foursectionframe"));
     }
+
+    //@SubscribeEvent
+    //public void onModelBakeEvent(ModelBakeEvent e) {
+    //}
 
     @SubscribeEvent
     public void onModelRegistryEvent(ModelRegistryEvent event) {

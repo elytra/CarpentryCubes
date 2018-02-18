@@ -9,13 +9,16 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CarpentryBakedModel implements IBakedModel {
@@ -24,23 +27,25 @@ public class CarpentryBakedModel implements IBakedModel {
     @Override
     public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
         List<BakedQuad> quads = Lists.newArrayList();
-        if (state == null) return Lists.newArrayList();
-        if (state.getBlock() instanceof BlockCarpentry) {
+        if (state != null && state.getBlock() instanceof BlockCarpentry) {
             BlockCarpentry block = (BlockCarpentry) state.getBlock();
             IExtendedBlockState extendedState = (IExtendedBlockState) state;
             IBlockState coverState = extendedState.getValue(BlockCarpentry.COVERSTATE);
             IBlockAccess access = extendedState.getValue(BlockCarpentry.BLOCK_ACCESS);
             BlockPos pos = extendedState.getValue(BlockCarpentry.POS);
+            if (!Objects.equals(block.getRenderLayer(access, pos), MinecraftForgeClient.getRenderLayer()))
+                return quads;
 
+            TextureAtlasSprite missingSprite = Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
             TextureAtlasSprite[] sprites = new TextureAtlasSprite[EnumFacing.values().length];
             int[] tintIndices = new int[EnumFacing.values().length];
             IBakedModel modelForState = getBlockModelShapes().getModelForState(coverState);
             for (EnumFacing facing : EnumFacing.values()) {
                 // Get the quads for the given face.
                 List<BakedQuad> coverStateQuads = modelForState.getQuads(coverState, facing, rand);
-                if (coverStateQuads.stream().anyMatch(q -> q.getSprite() != null)) {
+                if (coverStateQuads.stream().anyMatch(q -> q.getSprite() != missingSprite)) {
                     // Filter out any quads with no sprite.
-                    coverStateQuads = coverStateQuads.stream().filter(q -> q.getSprite() != null)
+                    coverStateQuads = coverStateQuads.stream().filter(q -> q.getSprite() != missingSprite)
                             .collect(Collectors.toList());
 
                     // Select a quad to use for this face.
@@ -56,8 +61,8 @@ public class CarpentryBakedModel implements IBakedModel {
                     continue;
                 }
 
-                // Fallback with missing texture.
-                sprites[facing.getIndex()] = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("missingno");
+                // Fallback with default texture.
+                sprites[facing.getIndex()] = block.getModel().getDefaultSprite();
             }
 
             // Build the model and return the quads for the side.
@@ -84,14 +89,12 @@ public class CarpentryBakedModel implements IBakedModel {
 
     @Override
     public boolean isBuiltInRenderer() {
-        return false;
+        return true;
     }
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("missingno");
-
-        return null;
+        return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("missingno");
     }
 
     @Override

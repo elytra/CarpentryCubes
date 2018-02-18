@@ -9,4 +9,6 @@ public interface ICarpentersModel<B extends BlockCarpentry> {
 
     CarpentryModelData.ModelDataQuads getQuads(BlockCarpentry block, IBlockAccess access, BlockPos pos, TextureAtlasSprite[] sprites, int[] tintIndices);
 
+    TextureAtlasSprite getDefaultSprite();
+
 }

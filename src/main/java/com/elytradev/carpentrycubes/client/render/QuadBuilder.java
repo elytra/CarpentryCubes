@@ -21,7 +21,8 @@ public class QuadBuilder {
     private Optional<TRSRTransformation> transform;
     private EnumFacing side;
 
-    public QuadBuilder(VertexFormat format, @Nullable TRSRTransformation transform, TextureAtlasSprite sprite, EnumFacing side, int tintIndex) {
+    public QuadBuilder(VertexFormat format, @Nullable TRSRTransformation transform, TextureAtlasSprite sprite,
+                       EnumFacing side, int tintIndex) {
         this.builder = new UnpackedBakedQuad.Builder(format);
         this.format = format;
         this.transform = Optional.of(transform);
@@ -30,9 +31,11 @@ public class QuadBuilder {
         this.builder.setTexture(sprite);
         this.builder.setQuadTint(tintIndex);
         this.builder.setQuadOrientation(side);
+        this.builder.setApplyDiffuseLighting(true);
+        this.builder.setContractUVs(true);
     }
 
-    public void putVertex(float x, float y, float z, float u, float v) {
+    public void putVertex(float x, float y, float z, float u, float v, float normalX, float normalY, float normalZ) {
         Vector4f vec = new Vector4f();
         for (int e = 0; e < format.getElementCount(); e++) {
             switch (format.getElement(e).getUsage()) {
@@ -57,7 +60,7 @@ public class QuadBuilder {
                         break;
                     }
                 case NORMAL:
-                    builder.put(e, (float) side.getFrontOffsetX(), (float) side.getFrontOffsetY(), (float) side.getFrontOffsetZ(), 0f);
+                    builder.put(e, normalX, normalY, normalZ, 0f);
                     break;
                 default:
                     builder.put(e);

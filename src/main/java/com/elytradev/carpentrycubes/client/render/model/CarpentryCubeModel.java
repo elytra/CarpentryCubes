@@ -10,4 +10,9 @@ public class CarpentryCubeModel implements ICarpentersModel<BlockCarpentry> {
     public CarpentryModelData.ModelDataQuads getQuads(BlockCarpentry block, IBlockAccess access, BlockPos pos, TextureAtlasSprite[] sprites, int[] tintIndices) {
         return null;
     }
+
+    @Override
+    public TextureAtlasSprite getDefaultSprite() {
+        return null;
+    }
 }

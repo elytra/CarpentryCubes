@@ -12,11 +12,11 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -98,7 +98,18 @@ public class BlockCarpentry extends BlockContainer {
     }
 
     @Override
-    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager) {
-        return super.addDestroyEffects(world, pos, manager);
+    public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
+        return true;
+    }
+
+    public BlockRenderLayer getRenderLayer(IBlockAccess access, BlockPos pos) {
+        if (access != null && pos != null) {
+            TileEntity tileEntity = access.getTileEntity(pos);
+            if (tileEntity instanceof TileCarpentry) {
+                return ((TileCarpentry) tileEntity).getCoverState().getBlock().getBlockLayer();
+            }
+        }
+
+        return BlockRenderLayer.CUTOUT;
     }
 }
