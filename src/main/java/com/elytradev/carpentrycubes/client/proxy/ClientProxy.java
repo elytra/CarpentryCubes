@@ -3,21 +3,35 @@ package com.elytradev.carpentrycubes.client.proxy;
 import com.elytradev.carpentrycubes.client.render.model.CarpentryModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
+import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import com.elytradev.carpentrycubes.common.proxy.CommonProxy;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.concrete.resgen.ConcreteResourcePack;
 import com.elytradev.concrete.resgen.IResourceHolder;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.apache.commons.lang3.ArrayUtils;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 public class ClientProxy extends CommonProxy {
 
@@ -28,9 +42,33 @@ public class ClientProxy extends CommonProxy {
         }
 
         if (state == LoaderState.ModState.INITIALIZED) {
+            registerBlockColours();
             registerItemRenderers();
         }
     }
+
+    private void registerBlockColours() {
+        BlockColors blockColors = Minecraft.getMinecraft().getBlockColors();
+        Collection<Block> values = CarpentryContent.registeredBlocks.values();
+        Block[] acceptedBlocks = new Block[values.size()];
+        values.toArray(acceptedBlocks);
+        blockColors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> {
+            if (worldIn == null || pos == null)
+                return -1;
+            if (state.getBlock() instanceof BlockCarpentry) {
+                TileEntity tile = worldIn.getTileEntity(pos);
+                if (tile instanceof TileCarpentry && ((TileCarpentry) tile).hasCoverState()) {
+                    TileCarpentry carpentryTile = (TileCarpentry) tile;
+
+                    int color = blockColors.colorMultiplier(carpentryTile.getCoverState(), worldIn, pos, tintIndex);
+                    return color;
+                }
+            }
+
+            return -1;
+        }, acceptedBlocks);
+    }
+
 
     public void registerItemRenderers() {
         Item itemToRegister = null;
@@ -59,9 +97,9 @@ public class ClientProxy extends CommonProxy {
         e.getMap().registerSprite(new ResourceLocation(CarpentryMod.MOD_ID, "blocks/foursectionframe"));
     }
 
-    //@SubscribeEvent
-    //public void onModelBakeEvent(ModelBakeEvent e) {
-    //}
+    @SubscribeEvent
+    public void onModelBakeEvent(ModelBakeEvent e) {
+    }
 
     @SubscribeEvent
     public void onModelRegistryEvent(ModelRegistryEvent event) {

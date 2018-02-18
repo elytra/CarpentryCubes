@@ -68,6 +68,4 @@ public class CarpentrySlopeModel implements ICarpentersModel<BlockCarpentrySlope
     public TextureAtlasSprite getDefaultSprite() {
         return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("carpentrycubes:blocks/foursectionframe");
     }
-
-
 }

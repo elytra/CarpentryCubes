@@ -67,6 +67,10 @@ public class TileCarpentry extends TileEntity {
         return coverState;
     }
 
+    public boolean hasCoverState() {
+        return coverState.getBlock() != Blocks.AIR;
+    }
+
     public void setCoverState(IBlockState coverState) {
         this.coverState = coverState;
     }

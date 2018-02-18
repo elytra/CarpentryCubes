@@ -105,7 +105,7 @@ public class BlockCarpentry extends BlockContainer {
     public BlockRenderLayer getRenderLayer(IBlockAccess access, BlockPos pos) {
         if (access != null && pos != null) {
             TileEntity tileEntity = access.getTileEntity(pos);
-            if (tileEntity instanceof TileCarpentry) {
+            if (tileEntity instanceof TileCarpentry && ((TileCarpentry) tileEntity).hasCoverState()) {
                 return ((TileCarpentry) tileEntity).getCoverState().getBlock().getBlockLayer();
             }
         }
