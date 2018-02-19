@@ -12,13 +12,13 @@ import javax.vecmath.Vector3f;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class QuadEligiblityTester implements IVertexConsumer {
+public class QuadEligibilityTester implements IVertexConsumer {
 
     private Vector3f[] points = new Vector3f[4];
     private int currentPoint = 0;
     private Vec3i requiredOffset;
 
-    public QuadEligiblityTester(BakedQuad quad) {
+    public QuadEligibilityTester(BakedQuad quad) {
         this.requiredOffset = quad.getFace().getDirectionVec();
     }
 

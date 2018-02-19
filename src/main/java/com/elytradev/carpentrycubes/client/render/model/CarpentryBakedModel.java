@@ -107,7 +107,7 @@ public class CarpentryBakedModel implements IBakedModel {
         List<BakedQuad> eligibleQuads = Lists.newArrayList();
 
         for (BakedQuad bakedQuad : selection) {
-            QuadEligiblityTester tester = new QuadEligiblityTester(bakedQuad);
+            QuadEligibilityTester tester = new QuadEligibilityTester(bakedQuad);
             LightUtil.putBakedQuad(tester, bakedQuad);
             if (tester.isValid()) {
                 eligibleQuads.add(bakedQuad);
