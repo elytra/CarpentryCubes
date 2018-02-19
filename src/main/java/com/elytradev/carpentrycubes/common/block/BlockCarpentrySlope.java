@@ -1,7 +1,7 @@
 package com.elytradev.carpentrycubes.common.block;
 
 import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
-import com.elytradev.carpentrycubes.client.render.model.ICarpentersModel;
+import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedEnumProperty;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
@@ -38,7 +38,7 @@ public class BlockCarpentrySlope extends BlockCarpentry {
     }
 
     @Override
-    public ICarpentersModel<? extends BlockCarpentry> getModel() {
+    public ICarpentryModel<? extends BlockCarpentry> getModel() {
         return CarpentrySlopeModel.getInstance();
     }
 

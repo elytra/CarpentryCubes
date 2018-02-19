@@ -1,6 +1,6 @@
 package com.elytradev.carpentrycubes.common.block;
 
-import com.elytradev.carpentrycubes.client.render.model.ICarpentersModel;
+import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockAccessProperty;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockPosProperty;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockStateProperty;
@@ -61,7 +61,7 @@ public class BlockCarpentry extends BlockContainer {
         return !playerIn.isSneaking();
     }
 
-    public ICarpentersModel<? extends BlockCarpentry> getModel() {
+    public ICarpentryModel<? extends BlockCarpentry> getModel() {
         return null;
     }
 

@@ -1,6 +1,7 @@
 package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.client.render.QuadBuilder;
+import com.elytradev.carpentrycubes.common.CarpentryLog;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
 
+import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,62 +25,72 @@ public class CarpentryModelData {
     private final Map<EnumFacing, float[][][]> masterData = Arrays.stream(EnumFacing.values()).collect(Collectors.toMap(e -> e, e -> new float[0][0][0]));
 
     private TRSRTransformation transform = TRSRTransformation.identity();
-    private EnumFacing rotation = EnumFacing.NORTH;
-    private int[] tintIndices = new int[EnumFacing.values().length];
-    private TextureAtlasSprite[] faceSprites = new TextureAtlasSprite[EnumFacing.values().length];
+    private ArrayList<Integer>[] tintIndices = new ArrayList[EnumFacing.values().length];
+    private ArrayList<TextureAtlasSprite>[] faceSprites = new ArrayList[EnumFacing.values().length];
+    private ArrayList<Vector3f>[] quadOffsets = new ArrayList[EnumFacing.values().length];
 
-    public void setFaceData(EnumFacing side, TextureAtlasSprite sprite, int tintIndex) {
-        this.faceSprites[side.getIndex()] = sprite;
-        this.tintIndices[side.getIndex()] = tintIndex;
+    public CarpentryModelData() {
+        Arrays.fill(this.tintIndices, new ArrayList<>());
+        Arrays.fill(this.faceSprites, new ArrayList<>());
+        Arrays.fill(this.quadOffsets, new ArrayList<>());
     }
 
-    public void setTransform(EnumFacing rotation, TRSRTransformation transform) {
-        this.rotation = rotation;
+    public void setFaceData(int quadNumber, EnumFacing side, TextureAtlasSprite sprite, int tintIndex, Vector3f offset) {
+        addOrSet(this.faceSprites[side.getIndex()], quadNumber, sprite);
+        addOrSet(this.tintIndices[side.getIndex()], quadNumber, tintIndex);
+        addOrSet(this.quadOffsets[side.getIndex()], quadNumber, offset);
+    }
+
+    private void addOrSet(ArrayList list, int index, Object element) {
+        if (index >= list.size()) {
+            list.add(index, element);
+        } else {
+            list.set(index, element);
+        }
+    }
+
+    public void setTransform(TRSRTransformation transform) {
         this.transform = transform;
     }
 
     public ModelDataQuads buildModel() {
         List<BakedQuad> generalQuads = Lists.newArrayList();
         Map<EnumFacing, List<BakedQuad>> faceQuads = Maps.newHashMap();
-
-        Map<EnumFacing, float[][][]> transformedMasterData = Maps.newHashMap();
-
-        for (Map.Entry<EnumFacing, float[][][]> entry : masterData.entrySet()) {
-            EnumFacing newFace = transform.rotate(entry.getKey());
-            transformedMasterData.putIfAbsent(newFace, entry.getValue());
-        }
-
         for (int faceIndex = 0; faceIndex < faceSprites.length; faceIndex++) {
             EnumFacing face = EnumFacing.values()[faceIndex];
             EnumFacing newFace = transform.rotate(face);
-            TextureAtlasSprite sprite = faceSprites[newFace.getIndex()];
-            int tintIndex = tintIndices[newFace.getIndex()];
-            float[][][] rawQuads = masterData.get(face);
-            faceQuads.putIfAbsent(newFace, Lists.newArrayList());
 
-            for (int quad = 0; quad < rawQuads.length; quad++) {
-                QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, newFace, tintIndex);
-                float[][] steps = rawQuads[quad];
+            int size = faceSprites[newFace.getIndex()].size();
+            for (int sideQuad = 0; sideQuad < size; sideQuad++) {
+                TextureAtlasSprite sprite = faceSprites[newFace.getIndex()].get(sideQuad);
+                Vector3f quadOffset = quadOffsets[newFace.getIndex()].get(sideQuad);
+                int tintIndex = tintIndices[newFace.getIndex()].get(sideQuad);
+                float[][][] rawQuads = masterData.get(face);
+                faceQuads.putIfAbsent(newFace, Lists.newArrayList());
 
-                for (int i = 0; i < steps.length; i++) {
-                    float[] instructions = steps[i];
-                    UVData data = new UVData(sprite, new float[]{sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV()});
-                    float uninterpolatedU, uninterpolatedV;
+                for (int quad = 0; quad < rawQuads.length; quad++) {
+                    QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, newFace, tintIndex);
+                    float[][] steps = rawQuads[quad];
 
-                    uninterpolatedU = instructions[3];
-                    uninterpolatedV = instructions[4];
+                    for (int i = 0; i < steps.length; i++) {
+                        float[] instructions = steps[i];
+                        UVData data = new UVData(sprite, new float[]{sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV()});
+                        float uninterpolatedU, uninterpolatedV;
 
-                    float u, v;
-                    u = data.getInterpolatedU(uninterpolatedU);
-                    v = data.getInterpolatedV(uninterpolatedV);
+                        uninterpolatedU = instructions[3];
+                        uninterpolatedV = instructions[4];
 
-                    quadBuilder.putVertex(instructions[0], instructions[1], instructions[2], u, v,
-                            instructions[5], instructions[6], instructions[7]);
+                        float u, v;
+                        u = data.getInterpolatedU(uninterpolatedU);
+                        v = data.getInterpolatedV(uninterpolatedV);
+
+                        quadBuilder.putVertex(instructions[0], instructions[1], instructions[2], u, v,
+                                instructions[5], instructions[6], instructions[7]);
+                    }
+                    BakedQuad builtQuad = quadBuilder.build();
+                    generalQuads.add(builtQuad);
+                    faceQuads.get(newFace).add(builtQuad);
                 }
-                BakedQuad builtQuad = quadBuilder.build();
-                generalQuads.add(builtQuad);
-                faceQuads.get(newFace).add(builtQuad);
-
             }
         }
 
@@ -104,10 +116,7 @@ public class CarpentryModelData {
         }
     }
 
-    private UVData rotateUVS(TextureAtlasSprite sprite, float angle) {
-        boolean flipU, flipV;
-        flipU = false;
-        flipV = false;
+    private UVData rotateUVS(TextureAtlasSprite sprite, float angle, boolean flipU, boolean flipV) {
         if (angle == 0) {
             return new UVData(sprite, new float[]{sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV()});
         }
@@ -138,9 +147,15 @@ public class CarpentryModelData {
     private void setup() {
         // reset the model data for a new draw request.
         this.transform = TRSRTransformation.identity();
-        this.rotation = EnumFacing.NORTH;
-        this.tintIndices = new int[EnumFacing.values().length];
-        this.faceSprites = new TextureAtlasSprite[EnumFacing.values().length];
+        this.tintIndices = new ArrayList[EnumFacing.values().length];
+        this.faceSprites = new ArrayList[EnumFacing.values().length];
+        this.quadOffsets = new ArrayList[EnumFacing.values().length];
+
+        for (int i = 0; i < tintIndices.length; i++) {
+            tintIndices[i] = Lists.newArrayList();
+            faceSprites[i] = Lists.newArrayList();
+            quadOffsets[i] = Lists.newArrayList();
+        }
     }
 
     public void addInstruction(EnumFacing facing, float x, float y, float z, float u, float v) {
