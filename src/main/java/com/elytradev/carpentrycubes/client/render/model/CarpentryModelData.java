@@ -1,12 +1,13 @@
 package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.client.render.QuadBuilder;
-import com.elytradev.carpentrycubes.common.CarpentryLog;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
 
@@ -22,17 +23,23 @@ import java.util.stream.Collectors;
  */
 public class CarpentryModelData {
 
+    private final ICarpentryModel<?> carpentryModel;
     private final Map<EnumFacing, float[][][]> masterData = Arrays.stream(EnumFacing.values()).collect(Collectors.toMap(e -> e, e -> new float[0][0][0]));
 
+    private IBlockState state;
+    private EnumFacing facing = EnumFacing.NORTH;
     private TRSRTransformation transform = TRSRTransformation.identity();
     private ArrayList<Integer>[] tintIndices = new ArrayList[EnumFacing.values().length];
     private ArrayList<TextureAtlasSprite>[] faceSprites = new ArrayList[EnumFacing.values().length];
     private ArrayList<Vector3f>[] quadOffsets = new ArrayList[EnumFacing.values().length];
 
-    public CarpentryModelData() {
-        Arrays.fill(this.tintIndices, new ArrayList<>());
-        Arrays.fill(this.faceSprites, new ArrayList<>());
-        Arrays.fill(this.quadOffsets, new ArrayList<>());
+    public CarpentryModelData(ICarpentryModel<?> carpentryModel) {
+        this.carpentryModel = carpentryModel;
+        for (int i = 0; i < tintIndices.length; i++) {
+            tintIndices[i] = Lists.newArrayList();
+            faceSprites[i] = Lists.newArrayList();
+            quadOffsets[i] = Lists.newArrayList();
+        }
     }
 
     public void setFaceData(int quadNumber, EnumFacing side, TextureAtlasSprite sprite, int tintIndex, Vector3f offset) {
@@ -49,8 +56,13 @@ public class CarpentryModelData {
         }
     }
 
-    public void setTransform(TRSRTransformation transform) {
+    public void setTransform(EnumFacing facing, TRSRTransformation transform) {
+        this.facing = facing;
         this.transform = transform;
+    }
+
+    public void setState(IBlockState state) {
+        this.state = state;
     }
 
     public ModelDataQuads buildModel() {
@@ -63,7 +75,6 @@ public class CarpentryModelData {
             int size = faceSprites[newFace.getIndex()].size();
             for (int sideQuad = 0; sideQuad < size; sideQuad++) {
                 TextureAtlasSprite sprite = faceSprites[newFace.getIndex()].get(sideQuad);
-                Vector3f quadOffset = quadOffsets[newFace.getIndex()].get(sideQuad);
                 int tintIndex = tintIndices[newFace.getIndex()].get(sideQuad);
                 float[][][] rawQuads = masterData.get(face);
                 faceQuads.putIfAbsent(newFace, Lists.newArrayList());
@@ -71,21 +82,16 @@ public class CarpentryModelData {
                 for (int quad = 0; quad < rawQuads.length; quad++) {
                     QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, newFace, tintIndex);
                     float[][] steps = rawQuads[quad];
-
                     for (int i = 0; i < steps.length; i++) {
                         float[] instructions = steps[i];
-                        UVData data = new UVData(sprite, new float[]{sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV()});
-                        float uninterpolatedU, uninterpolatedV;
-
-                        uninterpolatedU = instructions[3];
-                        uninterpolatedV = instructions[4];
-
+                        Vector3f normals = genNormals(steps, i);
+                        float[] uVs = carpentryModel.getUVs(face, newFace, facing, state, instructions[3], instructions[4]);
                         float u, v;
-                        u = data.getInterpolatedU(uninterpolatedU);
-                        v = data.getInterpolatedV(uninterpolatedV);
+                        u = sprite.getInterpolatedU(uVs[0]);
+                        v = sprite.getInterpolatedV(uVs[1]);
 
                         quadBuilder.putVertex(instructions[0], instructions[1], instructions[2], u, v,
-                                instructions[5], instructions[6], instructions[7]);
+                                normals.x, normals.y, normals.z);
                     }
                     BakedQuad builtQuad = quadBuilder.build();
                     generalQuads.add(builtQuad);
@@ -96,6 +102,36 @@ public class CarpentryModelData {
 
         setup();
         return new ModelDataQuads(generalQuads, faceQuads);
+    }
+
+    public Vector3f genNormals(float[][] steps, int curIndex) {
+        int prevIndex = curIndex == 0 ? 3 : curIndex - 1;
+        int nextIndex = curIndex == 3 ? 0 : curIndex + 1;
+
+        float[] point0 = steps[prevIndex];
+        float[] point1 = steps[curIndex];
+        float[] point2 = steps[nextIndex];
+        if (point0[0] == point1[0] &&
+                point0[1] == point1[1] &&
+                point0[2] == point1[2]) {
+            prevIndex = prevIndex == 0 ? 3 : prevIndex - 1;
+            point0 = steps[prevIndex];
+        }
+        if (point2[0] == point1[0] &&
+                point2[1] == point1[1] &&
+                point2[2] == point1[2]) {
+            nextIndex = prevIndex == 3 ? 0 : prevIndex + 1;
+            point2 = steps[nextIndex];
+        }
+
+        Vector3f prevPoint = new Vector3f(point0[0], point0[1], point0[2]);
+        Vector3f curPoint = new Vector3f(point1[0], point1[1], point1[2]);
+        Vector3f nextPoint = new Vector3f(point2[0], point2[1], point2[2]);
+        Vector3f normals = new Vector3f((prevPoint.x - curPoint.x) * (nextPoint.x - curPoint.x),
+                (prevPoint.y - curPoint.y) * (nextPoint.y - curPoint.y),
+                (prevPoint.z - curPoint.z) * (nextPoint.z - curPoint.z));
+
+        return normals;
     }
 
     public class ModelDataQuads {
@@ -116,36 +152,10 @@ public class CarpentryModelData {
         }
     }
 
-    private UVData rotateUVS(TextureAtlasSprite sprite, float angle, boolean flipU, boolean flipV) {
-        if (angle == 0) {
-            return new UVData(sprite, new float[]{sprite.getMinU(), sprite.getMinV(), sprite.getMaxU(), sprite.getMaxV()});
-        }
-
-        double minU = -0.5F;
-        double minV = -0.5F;
-        double maxU = 0.5F;
-        double maxV = 0.5F;
-
-        double cos = Math.cos(Math.toRadians(angle));
-        double sin = Math.sin(Math.toRadians(angle));
-        minU = (cos * minU) - (sin * minV);
-        minV = (sin * minU) + (cos * minV);
-        maxU = (cos * maxU) - (sin * maxV);
-        maxV = (sin * maxU) + (cos * maxV);
-
-        float minUOut, minVOut, maxUOut, maxVOut;
-
-        minUOut = sprite.getInterpolatedU((minU + 0.5F) * 16F);
-        minVOut = sprite.getInterpolatedV((minV + 0.5F) * 16F);
-        maxUOut = sprite.getInterpolatedU((maxU + 0.5F) * 16F);
-        maxVOut = sprite.getInterpolatedV((maxV + 0.5F) * 16F);
-
-        return new UVData(sprite, new float[]{flipU ? minUOut : sprite.getMinU(), flipV ? minVOut : sprite.getMinV(),
-                flipU ? maxUOut : sprite.getMaxU(), flipV ? maxVOut : sprite.getMaxV()});
-    }
-
     private void setup() {
         // reset the model data for a new draw request.
+        this.state = Blocks.AIR.getDefaultState();
+        this.facing = EnumFacing.NORTH;
         this.transform = TRSRTransformation.identity();
         this.tintIndices = new ArrayList[EnumFacing.values().length];
         this.faceSprites = new ArrayList[EnumFacing.values().length];
@@ -185,39 +195,5 @@ public class CarpentryModelData {
         quadArray = new float[quads.size()][][];
         quads.toArray(quadArray);
         masterData.replace(facing, quadArray);
-    }
-
-    private class UVData {
-        private float[] uvs = new float[]{-0.5F, -0.5F, 0.5F, 0.5F};
-
-        public UVData(TextureAtlasSprite sprite, float[] uvs) {
-            this.uvs = uvs;
-        }
-
-        public float getMinU() {
-            return uvs[0];
-        }
-
-        public float getMinV() {
-            return uvs[1];
-        }
-
-        public float getMaxU() {
-            return uvs[2];
-        }
-
-        public float getMaxV() {
-            return uvs[3];
-        }
-
-        public float getInterpolatedV(float v) {
-            float f = this.getMaxV() - this.getMinV();
-            return this.getMinV() + f * v / 16.0F;
-        }
-
-        public float getInterpolatedU(float u) {
-            float f = this.getMaxU() - this.getMinU();
-            return this.getMinU() + f * u / 16.0F;
-        }
     }
 }

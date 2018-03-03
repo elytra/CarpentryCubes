@@ -12,8 +12,10 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -35,6 +37,21 @@ public class BlockCarpentrySlope extends BlockCarpentry {
     @Override
     public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+    }
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        boolean result = super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+        if (!worldIn.isRemote) {
+            if (!playerIn.getHeldItem(hand).isEmpty())
+                return result;
+            IBlockState blockState = worldIn.getBlockState(pos);
+            if (blockState.getBlock() instanceof BlockCarpentrySlope) {
+                worldIn.setBlockState(pos, blockState.withProperty(CEILING, !blockState.getValue(CEILING)));
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -79,13 +96,28 @@ public class BlockCarpentrySlope extends BlockCarpentry {
     }
 
     @Override
+    public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+        return false;
+    }
+
+    @Override
     public boolean isFullBlock(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
         return false;
+    }
+
+    @Override
+    public int getLightOpacity(IBlockState state) {
+        return 0;
     }
 
     @SideOnly(Side.CLIENT)
