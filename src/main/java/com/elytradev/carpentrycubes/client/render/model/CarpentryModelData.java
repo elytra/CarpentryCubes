@@ -134,24 +134,6 @@ public class CarpentryModelData {
         return normals;
     }
 
-    public class ModelDataQuads {
-        private final List<BakedQuad> generalQuads;
-        private final Map<EnumFacing, List<BakedQuad>> faceQuads;
-
-        public ModelDataQuads(List<BakedQuad> generalQuads, Map<EnumFacing, List<BakedQuad>> faceQuads) {
-            this.generalQuads = generalQuads;
-            this.faceQuads = faceQuads;
-        }
-
-        public List<BakedQuad> getGeneralQuads() {
-            return generalQuads;
-        }
-
-        public Map<EnumFacing, List<BakedQuad>> getFaceQuads() {
-            return faceQuads;
-        }
-    }
-
     private void setup() {
         // reset the model data for a new draw request.
         this.state = Blocks.AIR.getDefaultState();
@@ -195,5 +177,23 @@ public class CarpentryModelData {
         quadArray = new float[quads.size()][][];
         quads.toArray(quadArray);
         masterData.replace(facing, quadArray);
+    }
+
+    public class ModelDataQuads {
+        private final List<BakedQuad> generalQuads;
+        private final Map<EnumFacing, List<BakedQuad>> faceQuads;
+
+        public ModelDataQuads(List<BakedQuad> generalQuads, Map<EnumFacing, List<BakedQuad>> faceQuads) {
+            this.generalQuads = generalQuads;
+            this.faceQuads = faceQuads;
+        }
+
+        public List<BakedQuad> getGeneralQuads() {
+            return generalQuads;
+        }
+
+        public Map<EnumFacing, List<BakedQuad>> getFaceQuads() {
+            return faceQuads;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.elytradev.carpentrycubes.client.render;
 
-import com.elytradev.carpentrycubes.common.CarpentryLog;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
