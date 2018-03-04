@@ -1,7 +1,9 @@
 package com.elytradev.carpentrycubes.common;
 
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
+import com.elytradev.carpentrycubes.common.item.ItemCarpentryTool;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -35,6 +37,7 @@ public class CarpentryContent {
     public static List<Object> skipItemMesh;
     public static String REGISTRY_PREFIX = MOD_ID.toLowerCase();
     public static BlockCarpentrySlope blockSlope;
+    public static Item itemTool;
     private static List<Item> itemBlocksToRegister;
     private int recipeID = 0;
     private CreativeTabs creativeTab = new CreativeTabs(CarpentryMod.MOD_ID) {
@@ -54,6 +57,7 @@ public class CarpentryContent {
     public void init(FMLInitializationEvent e) {
         // register tiles
         GameRegistry.registerTileEntity(TileCarpentry.class, REGISTRY_PREFIX + ":" + "tileCarpentry");
+        GameRegistry.registerTileEntity(TileCarpentrySlope.class, REGISTRY_PREFIX + ":" + "tileCarpentrySlope");
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -80,6 +84,9 @@ public class CarpentryContent {
         registeredItems = new HashMap<>();
         skipItemMesh = new ArrayList<>();
         itemBlocksToRegister.forEach(registry::register);
+
+        itemTool = new ItemCarpentryTool();
+        registerItem(registry, "carpentryTool", itemTool);
     }
 
     private void registerShapedRecipe(IForgeRegistry<IRecipe> registry, ItemStack out, Object... input) {

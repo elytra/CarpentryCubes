@@ -51,7 +51,7 @@ public class CarpentryBakedModel implements IBakedModel {
             gatherQuadData(rand, carpentryModel, coverState, modelForState, tintIndices, faceSprites, quadOffsets);
 
             // Build the model and return the quads for the side.
-            CarpentryModelData.ModelDataQuads modelDataQuads = carpentryModel.getQuads(block, access, pos, tintIndices, faceSprites, quadOffsets);
+            CarpentryModelData.ModelDataQuads modelDataQuads = carpentryModel.getQuads(state, access, pos, tintIndices, faceSprites, quadOffsets);
             return side == null ? modelDataQuads.getGeneralQuads() : modelDataQuads.getFaceQuads().get(side);
         }
 

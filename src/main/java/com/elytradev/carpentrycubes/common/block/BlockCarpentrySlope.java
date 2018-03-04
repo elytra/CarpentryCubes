@@ -2,6 +2,7 @@ package com.elytradev.carpentrycubes.common.block;
 
 import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
 import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedEnumProperty;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
@@ -24,6 +25,8 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+
 public class BlockCarpentrySlope extends BlockCarpentry {
 
     public static PropertyDirection FACING = PropertyDirection.create("facing");
@@ -36,18 +39,30 @@ public class BlockCarpentrySlope extends BlockCarpentry {
 
     @Override
     public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite()).withProperty(CEILING, false);
+    }
+
+    @Override
+    protected IUnlistedProperty[] getUnlistedProperties() {
+        return new IUnlistedProperty[]{SHAPE};
     }
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         boolean result = super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         if (!worldIn.isRemote) {
-            if (!playerIn.getHeldItem(hand).isEmpty())
+            if (playerIn.getHeldItem(hand).getItem() != CarpentryContent.itemTool)
                 return result;
             IBlockState blockState = worldIn.getBlockState(pos);
             if (blockState.getBlock() instanceof BlockCarpentrySlope) {
-                worldIn.setBlockState(pos, blockState.withProperty(CEILING, !blockState.getValue(CEILING)));
+                if (playerIn.isSneaking()) {
+                    TileEntity tileEntity = worldIn.getTileEntity(pos);
+                    if (tileEntity instanceof TileCarpentrySlope) {
+                        ((TileCarpentrySlope) tileEntity).setShape(BlockStairs.EnumShape.OUTER_LEFT);
+                    }
+                } else {
+                    worldIn.setBlockState(pos, blockState.withProperty(CEILING, !blockState.getValue(CEILING)));
+                }
             }
         }
 
@@ -131,5 +146,11 @@ public class BlockCarpentrySlope extends BlockCarpentry {
         }
 
         return super.shouldSideBeRendered(state, access, pos, side);
+    }
+
+    @Nullable
+    @Override
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
+        return new TileCarpentrySlope();
     }
 }

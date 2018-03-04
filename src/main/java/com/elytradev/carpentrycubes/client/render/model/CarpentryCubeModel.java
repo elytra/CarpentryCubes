@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class CarpentryCubeModel implements ICarpentryModel<BlockCarpentry> {
     @Override
-    public CarpentryModelData.ModelDataQuads getQuads(BlockCarpentry block, IBlockAccess access, BlockPos pos, ArrayList<Integer>[] tintIndices, ArrayList<TextureAtlasSprite>[] faceSprites, ArrayList<Vector3f>[] quadOffsets) {
+    public CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos, ArrayList<Integer>[] tintIndices, ArrayList<TextureAtlasSprite>[] faceSprites, ArrayList<Vector3f>[] quadOffsets) {
         return null;
     }
 

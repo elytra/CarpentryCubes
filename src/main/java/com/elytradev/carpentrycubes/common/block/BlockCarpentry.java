@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
 
@@ -41,6 +42,10 @@ public class BlockCarpentry extends BlockContainer {
 
     protected IProperty[] getProperties() {
         return new IProperty[0];
+    }
+
+    protected IUnlistedProperty[] getUnlistedProperties() {
+        return new IUnlistedProperty[0];
     }
 
     @Override
@@ -67,7 +72,7 @@ public class BlockCarpentry extends BlockContainer {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new ExtendedBlockState(this, getProperties(), new IUnlistedProperty[]{COVERSTATE, BLOCK_ACCESS, POS});
+        return new ExtendedBlockState(this, getProperties(), ArrayUtils.addAll(new IUnlistedProperty[]{COVERSTATE, BLOCK_ACCESS, POS}, getUnlistedProperties()));
     }
 
     @Override

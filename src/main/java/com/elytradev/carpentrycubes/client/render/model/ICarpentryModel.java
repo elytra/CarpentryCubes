@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public interface ICarpentryModel<B extends BlockCarpentry> {
 
-    CarpentryModelData.ModelDataQuads getQuads(BlockCarpentry block, IBlockAccess access, BlockPos pos,
+    CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos,
                                                ArrayList<Integer>[] tintIndices,
                                                ArrayList<TextureAtlasSprite>[] faceSprites,
                                                ArrayList<Vector3f>[] quadOffsets);
