@@ -1,11 +1,12 @@
 package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
-import net.minecraft.block.BlockStairs;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelRotation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -78,6 +79,43 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
         outterSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 0, 16, 0);
         outterSlopeModelData.addInstruction(EnumFacing.EAST, 0, 1, 1, 0, 0);
         outterSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 1, 0, 16);
+
+        innerSlopeModelData = new CarpentryModelData(getInstance());
+
+        innerSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 0, 0, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 0, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 1, 16, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 1, 0, 0);
+
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 1, 1, 16, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 1, 1, 0, 0);
+
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 1, 0, 0, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 0, 0, 0, 16);
+
+        innerSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 0, 1, 0, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 0, 1, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 1, 1, 16, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 1, 1, 0, 0);
+
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 1, 1, 1, 16, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 1, 1, 0, 0, 0);
+
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 1, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.WEST, 0, 1, 1, 16, 0);
+
+        innerSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 0, 16, 16);
+        innerSlopeModelData.addInstruction(EnumFacing.EAST, 1, 1, 0, 16, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.EAST, 1, 1, 1, 0, 0);
+        innerSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 1, 0, 16);
     }
 
     public static CarpentrySlopeModel getInstance() {
@@ -110,6 +148,16 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
                 break;
         }
         if (state.getValue(BlockCarpentrySlope.CEILING)) {
+            TileEntity tile = access.getTileEntity(pos);
+            if (tile instanceof TileCarpentrySlope) {
+                TileCarpentrySlope slope = (TileCarpentrySlope) tile;
+                if (slope.getShape() == BlockCarpentrySlope.EnumShape.INNER) {
+                    yRot -= 90;
+                } else if (slope.getShape() == BlockCarpentrySlope.EnumShape.OUTER) {
+                    yRot += 90;
+                }
+            }
+
             yRot += 180;
             xRot = 180;
         }
@@ -133,21 +181,14 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
 
     private CarpentryModelData getModelData(IBlockState state) {
         if (state instanceof IExtendedBlockState) {
-            BlockStairs.EnumShape shape = ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.SHAPE);
-            shape = shape == null ? BlockStairs.EnumShape.STRAIGHT : shape;
+            BlockCarpentrySlope.EnumShape shape = ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.SHAPE);
             switch (shape) {
                 case STRAIGHT:
                     return straightSlopeModelData;
-                case INNER_LEFT:
+                case INNER:
                     return innerSlopeModelData;
-                case INNER_RIGHT:
-                    return innerSlopeModelData;
-                case OUTER_LEFT:
+                case OUTER:
                     return outterSlopeModelData;
-                case OUTER_RIGHT:
-                    return outterSlopeModelData;
-                default:
-                    return straightSlopeModelData;
             }
         }
         return straightSlopeModelData;

@@ -172,7 +172,9 @@ public class CarpentryModelData {
         } else {
             ArrayList<float[]> steps = Lists.newArrayList();
             steps.add(instructions);
-            quads.add((float[][]) steps.toArray());
+            float[][] stepsArray = new float[steps.size()][];
+            steps.toArray(stepsArray);
+            quads.add(stepsArray);
         }
         quadArray = new float[quads.size()][][];
         quads.toArray(quadArray);
