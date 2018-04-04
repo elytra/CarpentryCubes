@@ -1,6 +1,7 @@
 package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
+import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumOrientation;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -128,6 +129,8 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
                                                       ArrayList<TextureAtlasSprite>[] faceSprites,
                                                       ArrayList<Vector3f>[] quadOffsets) {
         EnumFacing facing = state.getValue(BlockCarpentrySlope.FACING);
+        EnumOrientation orientation = state instanceof IExtendedBlockState ?
+                ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.ORIENTATION) : EnumOrientation.GROUND;
         CarpentryModelData modelData = getModelData(state);
         TRSRTransformation transform;
 
@@ -147,7 +150,7 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
                 yRot = 90;
                 break;
         }
-        if (state.getValue(BlockCarpentrySlope.CEILING)) {
+        if (orientation == EnumOrientation.CEILING) {
             TileEntity tile = access.getTileEntity(pos);
             if (tile instanceof TileCarpentrySlope) {
                 TileCarpentrySlope slope = (TileCarpentrySlope) tile;
@@ -196,7 +199,9 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
 
     @Override
     public float[] getUVs(EnumFacing oldFace, EnumFacing newFace, EnumFacing facing, IBlockState state, float oU, float oV) {
-        Boolean ceiling = state.getValue(BlockCarpentrySlope.CEILING);
+        EnumOrientation orientation = state instanceof IExtendedBlockState ?
+                ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.ORIENTATION) : EnumOrientation.GROUND;
+        Boolean ceiling = orientation == EnumOrientation.CEILING;
         if (oldFace == EnumFacing.DOWN || ceiling) {
             float angle = ceiling ? 180 : 0;
             if (oldFace == EnumFacing.DOWN)
