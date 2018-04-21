@@ -2,6 +2,7 @@ package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumOrientation;
+import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumShape;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -134,6 +135,34 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
         CarpentryModelData modelData = getModelData(state);
         TRSRTransformation transform;
 
+        outterSlopeModelData = new CarpentryModelData(getInstance());
+
+        outterSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 0, 0, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 0, 16, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 1, 16, 0);
+        outterSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 1, 0, 0);
+
+        outterSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 1, 1, 0, 0);
+        outterSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 0, 0, 0, 16);
+
+        outterSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 0, 1, 0, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 0, 1, 0, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 0, 1, 16, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 1, 1, 16, 0);
+
+        outterSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 1, 16, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.WEST, 1, 1, 1, 16, 0);
+
+        outterSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 0, 16, 16);
+        outterSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 0, 16, 0);
+        outterSlopeModelData.addInstruction(EnumFacing.EAST, 1, 1, 1, 0, 0);
+        outterSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 1, 0, 16);
+
+
         int xRot = 0;
         int yRot = 0;
         switch (facing) {
@@ -154,10 +183,10 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
             TileEntity tile = access.getTileEntity(pos);
             if (tile instanceof TileCarpentrySlope) {
                 TileCarpentrySlope slope = (TileCarpentrySlope) tile;
-                if (slope.getShape() == BlockCarpentrySlope.EnumShape.INNER) {
-                    yRot -= 90;
-                } else if (slope.getShape() == BlockCarpentrySlope.EnumShape.OUTER) {
+                if (slope.getShape() == EnumShape.INNER) {
                     yRot += 90;
+                } else if (slope.getShape() == EnumShape.OUTER) {
+                    yRot -= 90;
                 }
             }
 
@@ -184,7 +213,7 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
 
     private CarpentryModelData getModelData(IBlockState state) {
         if (state instanceof IExtendedBlockState) {
-            BlockCarpentrySlope.EnumShape shape = ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.SHAPE);
+            EnumShape shape = ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.SHAPE);
             switch (shape) {
                 case STRAIGHT:
                     return straightSlopeModelData;
@@ -199,13 +228,29 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
 
     @Override
     public float[] getUVs(EnumFacing oldFace, EnumFacing newFace, EnumFacing facing, IBlockState state, float oU, float oV) {
-        EnumOrientation orientation = state instanceof IExtendedBlockState ?
-                ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.ORIENTATION) : EnumOrientation.GROUND;
+        EnumOrientation orientation = EnumOrientation.GROUND;
+        EnumShape shape = EnumShape.STRAIGHT;
+
+        if (state instanceof IExtendedBlockState) {
+            IExtendedBlockState extendedState = (IExtendedBlockState) state;
+            orientation = extendedState.getValue(BlockCarpentrySlope.ORIENTATION);
+            shape = extendedState.getValue(BlockCarpentrySlope.SHAPE);
+        }
+
         Boolean ceiling = orientation == EnumOrientation.CEILING;
         if (oldFace == EnumFacing.DOWN || ceiling) {
             float angle = ceiling ? 180 : 0;
-            if (oldFace == EnumFacing.DOWN)
+            if (oldFace == EnumFacing.DOWN) {
+                if (ceiling) {
+                    angle += 180;
+                    if (shape == EnumShape.INNER) {
+                        angle += 90;
+                    } else if (shape == EnumShape.OUTER) {
+                        angle -= 90;
+                    }
+                }
                 angle += ceiling ? facing.getHorizontalAngle() : -facing.getOpposite().getHorizontalAngle();
+            }
             double uPoint = (oU / 16) - 0.5;
             double vPoint = (oV / 16) - 0.5;
             double cos = Math.cos(Math.toRadians(angle));
