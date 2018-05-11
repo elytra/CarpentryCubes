@@ -4,9 +4,12 @@ import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
 import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedEnumProperty;
+import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer.EnumToolMode;
 import com.elytradev.carpentrycubes.common.network.TileUpdateMessage;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
+import java.util.Objects;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
@@ -28,12 +31,10 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
-import java.util.Objects;
-
 public class BlockCarpentrySlope extends BlockCarpentry {
 
-    public static PropertyDirection FACING = PropertyDirection.create("facing");
+    public static PropertyDirection PRIMARY_DIRECTION = PropertyDirection.create("facing");
+    public static IUnlistedProperty<EnumFacing> SECONDARY_DIRECTION = UnlistedEnumProperty.create("secondary_facing", EnumFacing.class);
     public static IUnlistedProperty<EnumShape> SHAPE = UnlistedEnumProperty.create("shape", EnumShape.class);
     public static IUnlistedProperty<EnumOrientation> ORIENTATION = UnlistedEnumProperty.create("orientation", EnumOrientation.class);
 
@@ -42,45 +43,65 @@ public class BlockCarpentrySlope extends BlockCarpentry {
     }
 
     @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-        // Check neighbouring positions for any other slopes.
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+        float hitZ, int meta, EntityLivingBase placer) {
+        // TODO: Check neighbouring positions for any other slopes.
 
-
-        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+        return this.getDefaultState().withProperty(PRIMARY_DIRECTION, placer.getHorizontalFacing().getOpposite());
     }
 
     @Override
     protected IUnlistedProperty[] getUnlistedProperties() {
-        return new IUnlistedProperty[]{SHAPE, ORIENTATION};
+        return new IUnlistedProperty[]{SECONDARY_DIRECTION, SHAPE, ORIENTATION};
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
+        EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         boolean result = super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         if (!worldIn.isRemote) {
             ItemStack heldItem = playerIn.getHeldItem(hand);
             IBlockState blockState = worldIn.getBlockState(pos);
             if (blockState.getBlock() instanceof BlockCarpentrySlope
-                    && Objects.equals(heldItem.getItem(), CarpentryContent.itemTool)) {
+                && Objects.equals(heldItem.getItem(), CarpentryContent.itemHammer)) {
 
+                EnumToolMode toolMode = EnumToolMode.byId(heldItem.getMetadata());
                 TileEntity tileEntity = worldIn.getTileEntity(pos);
-                TileCarpentrySlope carpentrySlope = tileEntity instanceof TileCarpentrySlope ? (TileCarpentrySlope) tileEntity : null;
+                TileCarpentrySlope carpentrySlope =
+                    tileEntity instanceof TileCarpentrySlope ? (TileCarpentrySlope) tileEntity : null;
                 if (carpentrySlope != null) {
-                    if (playerIn.isSneaking()) {
-                        int shape = carpentrySlope.getShape().ordinal();
-                        shape = shape >= EnumShape.values().length - 1 ? 0 : shape + 1;
-                        carpentrySlope.setShape(EnumShape.values()[shape]);
-                    } else {
-                        int orientation = carpentrySlope.getOrientation().ordinal();
-                        orientation = orientation >= EnumOrientation.values().length - 1 ? 0 : orientation + 1;
-                        carpentrySlope.setOrientation(EnumOrientation.values()[orientation]);
+                    switch (toolMode) {
+                        case TWEAK:
+                            int shape = carpentrySlope.getShape().ordinal();
+                            shape = shape >= EnumShape.values().length - 1 ? 0 : shape + 1;
+                            carpentrySlope.setShape(EnumShape.values()[shape]);
+                            break;
+                        case ORIENT:
+                            int orientation = carpentrySlope.getOrientation().ordinal();
+                            orientation = orientation >= EnumOrientation.values().length - 1 ? 0 : orientation + 1;
+                            carpentrySlope.setOrientation(EnumOrientation.values()[orientation]);
+                            break;
+                        case ROTATE:
+                            if (playerIn.isSneaking()) {
+                                int rotation = carpentrySlope.getSecondaryDirection().getHorizontalIndex();
+                                rotation = rotation >= EnumFacing.HORIZONTALS.length - 1 ? 0 : rotation + 1;
+                                carpentrySlope.setSecondaryDirection(EnumFacing.HORIZONTALS[rotation]);
+                            } else {
+                                int rotation = state.getValue(PRIMARY_DIRECTION).getHorizontalIndex();
+                                rotation = rotation >= EnumFacing.HORIZONTALS.length - 1 ? 0 : rotation + 1;
+                                worldIn.setBlockState(pos, state.withProperty(PRIMARY_DIRECTION, EnumFacing.HORIZONTALS[rotation]));
+                            }
+                            break;
+                        default:
+                            break;
                     }
                     new TileUpdateMessage(carpentrySlope).sendToAllWatching(carpentrySlope);
                 }
             }
 
-            if (result)
+            if (result) {
                 worldIn.playSound(null, pos, SoundEvents.BLOCK_WOOD_PLACE, SoundCategory.BLOCKS, 1F, 2);
+            }
         }
 
         return result;
@@ -93,17 +114,17 @@ public class BlockCarpentrySlope extends BlockCarpentry {
 
     @Override
     protected IProperty[] getProperties() {
-        return new IProperty[]{FACING};
+        return new IProperty[]{PRIMARY_DIRECTION};
     }
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.values()[meta]);
+        return this.getDefaultState().withProperty(PRIMARY_DIRECTION, EnumFacing.values()[meta]);
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        return state.getValue(FACING).getIndex();
+        return state.getValue(PRIMARY_DIRECTION).getIndex();
     }
 
     @Override
@@ -113,8 +134,9 @@ public class BlockCarpentrySlope extends BlockCarpentry {
         if (state instanceof IExtendedBlockState && tile instanceof TileCarpentrySlope) {
             TileCarpentrySlope tileCarpentrySlope = (TileCarpentrySlope) tile;
             IExtendedBlockState extendedState = (IExtendedBlockState) state;
-            state = extendedState.withProperty(SHAPE, tileCarpentrySlope.getShape())
-                    .withProperty(ORIENTATION, tileCarpentrySlope.getOrientation());
+            state = extendedState.withProperty(SECONDARY_DIRECTION, tileCarpentrySlope.getSecondaryDirection())
+                .withProperty(SHAPE, tileCarpentrySlope.getShape())
+                .withProperty(ORIENTATION, tileCarpentrySlope.getOrientation());
         }
         return state;
     }
@@ -184,14 +206,16 @@ public class BlockCarpentrySlope extends BlockCarpentry {
     }
 
     public enum EnumOrientation implements IStringSerializable {
-        GROUND("ground"),
-        CEILING("ceiling"),
-        WALL("wall");
+        GROUND("ground", 0),
+        CEILING("ceiling", 180),
+        WALL("wall", 90);
 
         private final String name;
+        private final int zRotation;
 
-        EnumOrientation(String name) {
+        EnumOrientation(String name, int zRotation) {
             this.name = name;
+            this.zRotation = zRotation;
         }
 
         public String toString() {
@@ -200,6 +224,10 @@ public class BlockCarpentrySlope extends BlockCarpentry {
 
         public String getName() {
             return this.name;
+        }
+
+        public int getZRotation() {
+            return zRotation;
         }
     }
 }

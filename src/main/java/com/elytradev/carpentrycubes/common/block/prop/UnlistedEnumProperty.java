@@ -34,8 +34,8 @@ public class UnlistedEnumProperty<T extends Enum<T>> implements IUnlistedPropert
     @Override
     public String valueToString(Enum value) {
         return "UnlistedBlockStateProperty{" +
-                "name='" + name + '\'' +
-                "enum='" + value + "\'" +
-                '}';
+            "name='" + name + '\'' +
+            "enum='" + value + "\'" +
+            '}';
     }
 }

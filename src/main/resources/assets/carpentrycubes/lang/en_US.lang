@@ -1,1 +1,13 @@
 tile.carpentrycubes.carpentrySlope=Capentry Slope
+
+item.carpentrycubes.hammer.name=Carpentry Hammer
+
+carpentrycubes.tooltip.rotate.name=Rotate Mode
+carpentrycubes.tooltip.tweak.name=Tweak Mode
+carpentrycubes.tooltip.scrape.name=Scrape Mode
+carpentrycubes.tooltip.orient.name=Orient Mode
+carpentrycubes.tooltip.rotate.description=Used to change the rotation of a carpentry cube, \n crouch during use to adjust the secondary rotation if applicable.
+carpentrycubes.tooltip.tweak.description=Used to change the appearance of a supported carpentry cube.
+carpentrycubes.tooltip.scrape.description=Used for scraping off the cover on a carpentry cube of any type.
+carpentrycubes.tooltip.orient.description=Used to change the orientation of a supported carpentry cube.
+carpentrycubes.tooltip.itemhint=Press §6SHIFT§7 for more info.

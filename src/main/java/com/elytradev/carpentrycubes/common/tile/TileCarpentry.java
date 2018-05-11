@@ -1,9 +1,12 @@
 package com.elytradev.carpentrycubes.common.tile;
 
 import com.elytradev.carpentrycubes.common.CarpentryLog;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -11,8 +14,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import javax.annotation.Nullable;
 
 public class TileCarpentry extends TileEntity {
 
@@ -73,5 +74,16 @@ public class TileCarpentry extends TileEntity {
 
     public boolean hasCoverState() {
         return coverState.getBlock() != Blocks.AIR;
+    }
+
+    public void removeCoverState(boolean drop) {
+        if (hasCoverState()) {
+            if (drop) {
+                ItemStack coverStack = coverState.getBlock().getItem(world, pos, getCoverState());
+                world.spawnEntity(new EntityItem(world, pos.getX(), pos.getY(), pos.getZ(), coverStack));
+            }
+
+            this.setCoverState(Blocks.AIR.getDefaultState());
+        }
     }
 }

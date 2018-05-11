@@ -1,5 +1,8 @@
 package com.elytradev.carpentrycubes.client.render.model;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import javax.vecmath.Vector3f;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -7,10 +10,6 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
-
-import javax.vecmath.Vector3f;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class QuadEligibilityTester implements IVertexConsumer {
 
@@ -79,8 +78,8 @@ public class QuadEligibilityTester implements IVertexConsumer {
      */
     private boolean checkPointRounding(Vector3f point) {
         return (!(point.getX() != 0) || !(point.getX() != 1)) &&
-                (!(point.getY() != 0) || !(point.getY() != 1)) &&
-                (!(point.getZ() != 0) || !(point.getZ() != 1));
+            (!(point.getY() != 0) || !(point.getY() != 1)) &&
+            (!(point.getZ() != 0) || !(point.getZ() != 1));
     }
 
     /**
@@ -93,13 +92,13 @@ public class QuadEligibilityTester implements IVertexConsumer {
         boolean passed = true;
 
         if ((requiredOffset.getX() == -1 && point.getX() != 0) ||
-                (requiredOffset.getX() == 1 && point.getX() != 1))
+            (requiredOffset.getX() == 1 && point.getX() != 1))
             passed = false;
         if ((requiredOffset.getY() == -1 && point.getY() != 0) ||
-                (requiredOffset.getY() == 1 && point.getY() != 1))
+            (requiredOffset.getY() == 1 && point.getY() != 1))
             passed = false;
         if ((requiredOffset.getZ() == -1 && point.getZ() != 0) ||
-                (requiredOffset.getZ() == 1 && point.getZ() != 1))
+            (requiredOffset.getZ() == 1 && point.getZ() != 1))
             passed = false;
 
         return passed;

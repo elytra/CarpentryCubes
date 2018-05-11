@@ -1,11 +1,14 @@
 package com.elytradev.carpentrycubes.common.block;
 
 import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockAccessProperty;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockPosProperty;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockStateProperty;
+import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer.EnumToolMode;
 import com.elytradev.carpentrycubes.common.network.TileUpdateMessage;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -28,8 +31,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import org.apache.commons.lang3.ArrayUtils;
 
-import javax.annotation.Nullable;
-
 public class BlockCarpentry extends BlockContainer {
 
     public static final IUnlistedProperty<IBlockState> COVERSTATE = UnlistedBlockStateProperty.create("cover");
@@ -49,11 +50,26 @@ public class BlockCarpentry extends BlockContainer {
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (!worldIn.isRemote && worldIn.getTileEntity(pos) instanceof TileCarpentry) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
+        EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (worldIn.getTileEntity(pos) instanceof TileCarpentry) {
             TileCarpentry tileCarpentry = (TileCarpentry) worldIn.getTileEntity(pos);
             ItemStack heldItem = playerIn.getHeldItem(hand);
-            if (Block.getBlockFromItem(heldItem.getItem()) != Blocks.AIR && !playerIn.isSneaking()) {
+            EnumToolMode toolMode = null;
+            if (heldItem.getItem().equals(CarpentryContent.itemHammer))
+                toolMode = EnumToolMode.byId(heldItem.getMetadata());
+
+            if (tileCarpentry.hasCoverState()) {
+                if (toolMode == EnumToolMode.SCRAPE) {
+                    if (!worldIn.isRemote)
+                        tileCarpentry.removeCoverState(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            if (!worldIn.isRemote && Block.getBlockFromItem(heldItem.getItem()) != Blocks.AIR
+                && !playerIn.isSneaking()) {
                 Block block = Block.getBlockFromItem(heldItem.getItem());
                 if (block instanceof BlockCarpentry)
                     return false;
@@ -72,7 +88,8 @@ public class BlockCarpentry extends BlockContainer {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new ExtendedBlockState(this, getProperties(), ArrayUtils.addAll(new IUnlistedProperty[]{COVERSTATE, BLOCK_ACCESS, POS}, getUnlistedProperties()));
+        return new ExtendedBlockState(this, getProperties(), ArrayUtils.addAll(new IUnlistedProperty[]{COVERSTATE,
+            BLOCK_ACCESS, POS}, getUnlistedProperties()));
     }
 
     @Override
@@ -85,8 +102,8 @@ public class BlockCarpentry extends BlockContainer {
         if (state instanceof IExtendedBlockState && world.getTileEntity(pos) instanceof TileCarpentry) {
             TileCarpentry tileCarpentry = (TileCarpentry) world.getTileEntity(pos);
             state = ((IExtendedBlockState) state).withProperty(COVERSTATE, tileCarpentry.getCoverState())
-                    .withProperty(BLOCK_ACCESS, world)
-                    .withProperty(POS, pos);
+                .withProperty(BLOCK_ACCESS, world)
+                .withProperty(POS, pos);
         }
         return super.getExtendedState(state, world, pos);
     }

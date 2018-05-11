@@ -1,15 +1,14 @@
 package com.elytradev.carpentrycubes.client.render;
 
+import java.util.Optional;
+import javax.annotation.Nullable;
+import javax.vecmath.Vector4f;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.common.model.TRSRTransformation;
-
-import javax.annotation.Nullable;
-import javax.vecmath.Vector4f;
-import java.util.Optional;
 
 /**
  * Small utility class for building quads, makes things less painful.
@@ -22,7 +21,7 @@ public class QuadBuilder {
     private EnumFacing side;
 
     public QuadBuilder(VertexFormat format, @Nullable TRSRTransformation transform, TextureAtlasSprite sprite,
-                       EnumFacing side, int tintIndex) {
+        EnumFacing side, int tintIndex) {
         this.builder = new UnpackedBakedQuad.Builder(format);
         this.format = format;
         this.transform = Optional.of(transform);

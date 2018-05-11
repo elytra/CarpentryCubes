@@ -2,6 +2,12 @@ package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.vecmath.Vector3f;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -15,13 +21,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.common.property.IExtendedBlockState;
-
-import javax.annotation.Nullable;
-import javax.vecmath.Vector3f;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class CarpentryBakedModel implements IBakedModel {
 
@@ -58,10 +57,11 @@ public class CarpentryBakedModel implements IBakedModel {
         return quads;
     }
 
-    private void gatherQuadData(long rand, ICarpentryModel<? extends BlockCarpentry> carpentryModel, IBlockState coverState, IBakedModel modelForState,
-                                ArrayList<Integer>[] tintIndices,
-                                ArrayList<TextureAtlasSprite>[] faceSprites,
-                                ArrayList<Vector3f>[] quadOffsets) {
+    private void gatherQuadData(long rand, ICarpentryModel<? extends BlockCarpentry> carpentryModel,
+        IBlockState coverState, IBakedModel modelForState,
+        ArrayList<Integer>[] tintIndices,
+        ArrayList<TextureAtlasSprite>[] faceSprites,
+        ArrayList<Vector3f>[] quadOffsets) {
         TextureAtlasSprite missingSprite = Minecraft.getMinecraft().getTextureMapBlocks().getMissingSprite();
 
         for (EnumFacing facing : EnumFacing.values()) {
@@ -70,7 +70,7 @@ public class CarpentryBakedModel implements IBakedModel {
             if (coverStateQuads.stream().anyMatch(q -> q.getSprite() != missingSprite)) {
                 // Filter out any quads with no sprite.
                 coverStateQuads = coverStateQuads.stream().filter(q -> q.getSprite() != missingSprite)
-                        .collect(Collectors.toList());
+                    .collect(Collectors.toList());
 
                 // Select a quad to use for this face.
                 List<BakedQuad> eligibleQuads = findEligibleQuads(coverStateQuads);

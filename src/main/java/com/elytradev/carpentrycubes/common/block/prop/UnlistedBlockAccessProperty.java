@@ -33,8 +33,8 @@ public class UnlistedBlockAccessProperty implements IUnlistedProperty<IBlockAcce
     @Override
     public String valueToString(IBlockAccess value) {
         return "UnlistedBlockStateProperty{" +
-                "name='" + name + '\'' +
-                "access='" + value + "\'" +
-                '}';
+            "name='" + name + '\'' +
+            "access='" + value + "\'" +
+            '}';
     }
 }

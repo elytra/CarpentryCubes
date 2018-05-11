@@ -1,9 +1,14 @@
 package com.elytradev.carpentrycubes.common;
 
+import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
+
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
-import com.elytradev.carpentrycubes.common.item.ItemCarpentryTool;
+import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -24,12 +29,6 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import net.minecraftforge.registries.IForgeRegistry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
-
 public class CarpentryContent {
 
     public static HashMap<String, Block> registeredBlocks;
@@ -37,7 +36,7 @@ public class CarpentryContent {
     public static List<Object> skipItemMesh;
     public static String REGISTRY_PREFIX = MOD_ID.toLowerCase();
     public static BlockCarpentrySlope blockSlope;
-    public static Item itemTool;
+    public static ItemCarpentryHammer itemHammer;
     private static List<Item> itemBlocksToRegister;
     private int recipeID = 0;
     private CreativeTabs creativeTab = new CreativeTabs(CarpentryMod.MOD_ID) {
@@ -85,8 +84,8 @@ public class CarpentryContent {
         skipItemMesh = new ArrayList<>();
         itemBlocksToRegister.forEach(registry::register);
 
-        itemTool = new ItemCarpentryTool();
-        registerItem(registry, "carpentryTool", itemTool);
+        itemHammer = new ItemCarpentryHammer();
+        registerItem(registry, "carpentryTool", itemHammer);
     }
 
     private void registerShapedRecipe(IForgeRegistry<IRecipe> registry, ItemStack out, Object... input) {
@@ -113,7 +112,8 @@ public class CarpentryContent {
         CarpentryContent.registeredBlocks.put(id, block);
     }
 
-    private void registerBlock(IForgeRegistry<Block> registry, String id, Block block, Class<? extends ItemBlock> itemBlockClass) {
+    private void registerBlock(IForgeRegistry<Block> registry, String id, Block block,
+        Class<? extends ItemBlock> itemBlockClass) {
         try {
             block.setUnlocalizedName("carpentrycubes." + id);
             block.setRegistryName(REGISTRY_PREFIX, id);

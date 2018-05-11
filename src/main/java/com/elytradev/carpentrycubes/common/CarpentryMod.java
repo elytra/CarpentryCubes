@@ -16,6 +16,11 @@
 
 package com.elytradev.carpentrycubes.common;
 
+import static com.elytradev.carpentrycubes.common.CarpentryMod.GUI_FACTORY;
+import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
+import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_NAME;
+import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_VER;
+
 import com.elytradev.carpentrycubes.common.network.CarpentryNetworking;
 import com.elytradev.carpentrycubes.common.proxy.CommonProxy;
 import com.elytradev.probe.api.IProbeDataProvider;
@@ -30,11 +35,10 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-import static com.elytradev.carpentrycubes.common.CarpentryMod.*;
-
 
 @Mod(modid = MOD_ID, name = MOD_NAME, version = MOD_VER, guiFactory = GUI_FACTORY)
 public class CarpentryMod {
+
     public static final String MOD_ID = "carpentrycubes";
     public static final String MOD_NAME = "Carpentry Cubes";
     public static final String MOD_VER = "%VERSION%";
@@ -51,7 +55,7 @@ public class CarpentryMod {
     public static Capability<?> PROBE_CAPABILITY;
 
     @SidedProxy(serverSide = "com.elytradev.carpentrycubes.common.proxy.CommonProxy",
-            clientSide = "com.elytradev.carpentrycubes.client.proxy.ClientProxy")
+        clientSide = "com.elytradev.carpentrycubes.client.proxy.ClientProxy")
     public static CommonProxy PROXY;
 
     @EventHandler

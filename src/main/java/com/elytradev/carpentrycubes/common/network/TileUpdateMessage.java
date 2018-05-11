@@ -3,13 +3,12 @@ package com.elytradev.carpentrycubes.common.network;
 import com.elytradev.concrete.network.Message;
 import com.elytradev.concrete.network.NetworkContext;
 import com.elytradev.concrete.network.annotation.type.ReceivedOn;
+import javax.annotation.Nonnull;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
-
-import javax.annotation.Nonnull;
 
 @ReceivedOn(Side.CLIENT)
 public class TileUpdateMessage extends Message {

@@ -33,8 +33,8 @@ public class UnlistedBlockPosProperty implements IUnlistedProperty<BlockPos> {
     @Override
     public String valueToString(BlockPos value) {
         return "UnlistedBlockStateProperty{" +
-                "name='" + name + '\'' +
-                "pos='" + value + "\'" +
-                '}';
+            "name='" + name + '\'' +
+            "pos='" + value + "\'" +
+            '}';
     }
 }
