@@ -38,10 +38,10 @@ public class CarpentryContent {
     public static BlockCarpentrySlope blockSlope;
     public static ItemCarpentryHammer itemHammer;
     private static List<Item> itemBlocksToRegister;
-    private int recipeID = 0;
+    public int recipeID = 0;
     private CreativeTabs creativeTab = new CreativeTabs(CarpentryMod.MOD_ID) {
         @Override
-        public ItemStack getTabIconItem() {
+        public ItemStack createIcon() {
             return Items.BAKED_POTATO.getDefaultInstance();
         }
     };
@@ -89,12 +89,12 @@ public class CarpentryContent {
     }
 
     private void registerShapedRecipe(IForgeRegistry<IRecipe> registry, ItemStack out, Object... input) {
-        ResourceLocation resourceLocation = new ResourceLocation(MOD_ID, out.getUnlocalizedName() + recipeID++);
+        ResourceLocation resourceLocation = new ResourceLocation(MOD_ID, out.getTranslationKey() + recipeID++);
         registry.register(new ShapedOreRecipe(resourceLocation, out, input).setRegistryName(resourceLocation));
     }
 
     private void registerShapelessRecipe(IForgeRegistry<IRecipe> registry, ItemStack out, Object... input) {
-        ResourceLocation resourceLocation = new ResourceLocation(MOD_ID, out.getUnlocalizedName() + recipeID++);
+        ResourceLocation resourceLocation = new ResourceLocation(MOD_ID, out.getTranslationKey() + recipeID++);
         registry.register(new ShapelessOreRecipe(resourceLocation, out, input).setRegistryName(resourceLocation));
     }
 
@@ -103,7 +103,7 @@ public class CarpentryContent {
     }
 
     private void registerBlock(IForgeRegistry<Block> registry, String id, Block block, boolean withItemBlock) {
-        block.setUnlocalizedName("carpentrycubes." + id);
+        block.setTranslationKey("carpentrycubes." + id);
         block.setRegistryName(REGISTRY_PREFIX, id);
         block.setCreativeTab(creativeTab);
         registry.register(block);
@@ -115,7 +115,7 @@ public class CarpentryContent {
     private void registerBlock(IForgeRegistry<Block> registry, String id, Block block,
         Class<? extends ItemBlock> itemBlockClass) {
         try {
-            block.setUnlocalizedName("carpentrycubes." + id);
+            block.setTranslationKey("carpentrycubes." + id);
             block.setRegistryName(REGISTRY_PREFIX, id);
             registry.register(block);
 
@@ -130,7 +130,7 @@ public class CarpentryContent {
     }
 
     private void registerItem(IForgeRegistry<Item> registry, String id, Item item) {
-        item.setUnlocalizedName("carpentrycubes." + id);
+        item.setTranslationKey("carpentrycubes." + id);
         item.setRegistryName(REGISTRY_PREFIX, id);
         item.setCreativeTab(creativeTab);
         registry.register(item);

@@ -128,7 +128,7 @@ public class BlockCarpentry extends BlockContainer {
         if (access != null && pos != null) {
             TileEntity tileEntity = access.getTileEntity(pos);
             if (tileEntity instanceof TileCarpentry && ((TileCarpentry) tileEntity).hasCoverState()) {
-                return ((TileCarpentry) tileEntity).getCoverState().getBlock().getBlockLayer();
+                return ((TileCarpentry) tileEntity).getCoverState().getBlock().getRenderLayer();
             }
         }
 

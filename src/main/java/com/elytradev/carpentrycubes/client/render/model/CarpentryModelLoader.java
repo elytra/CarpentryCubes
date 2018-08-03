@@ -14,7 +14,7 @@ public class CarpentryModelLoader implements ICustomModelLoader {
     @Override
     public boolean accepts(ResourceLocation modelLocation) {
         // TODO: Additional checks for the resource path.
-        return modelLocation.getResourceDomain().equals(MOD_ID) && !modelLocation.getResourcePath().contains("tool");
+        return modelLocation.getNamespace().equals(MOD_ID) && !modelLocation.getPath().contains("tool");
     }
 
     @Override
