@@ -3,12 +3,6 @@ package com.elytradev.carpentrycubes.client.render.model;
 import com.elytradev.carpentrycubes.client.render.QuadBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.vecmath.Vector3f;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -16,6 +10,13 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
+
+import javax.vecmath.Vector3f;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Stores quad info that can be modified with given transforms, tintindices, and face sprites.
@@ -42,7 +43,7 @@ public class CarpentryModelData {
     }
 
     public void setFaceData(int quadNumber, EnumFacing side, TextureAtlasSprite sprite, int tintIndex,
-        Vector3f offset) {
+                            Vector3f offset) {
         addOrSet(this.faceSprites[side.getIndex()], quadNumber, sprite);
         addOrSet(this.tintIndices[side.getIndex()], quadNumber, tintIndex);
         addOrSet(this.quadOffsets[side.getIndex()], quadNumber, offset);
@@ -91,7 +92,7 @@ public class CarpentryModelData {
                         v = sprite.getInterpolatedV(uVs[1]);
 
                         quadBuilder.putVertex(instructions[0], instructions[1], instructions[2], u, v,
-                            normals.x, normals.y, normals.z);
+                                normals.x, normals.y, normals.z);
                     }
                     BakedQuad builtQuad = quadBuilder.build();
                     generalQuads.add(builtQuad);
@@ -108,28 +109,25 @@ public class CarpentryModelData {
         int prevIndex = curIndex == 0 ? 3 : curIndex - 1;
         int nextIndex = curIndex == 3 ? 0 : curIndex + 1;
 
-        float[] point0 = steps[prevIndex];
-        float[] point1 = steps[curIndex];
-        float[] point2 = steps[nextIndex];
-        if (point0[0] == point1[0] &&
-            point0[1] == point1[1] &&
-            point0[2] == point1[2]) {
+        Vector3f prevVertex = new Vector3f(steps[prevIndex]);
+        Vector3f curVertex = new Vector3f(steps[curIndex]);
+        Vector3f nextVertex = new Vector3f(steps[nextIndex]);
+
+        // Sanity checks for irregular quads.
+        if (prevVertex.equals(curVertex)) {
             prevIndex = prevIndex == 0 ? 3 : prevIndex - 1;
-            point0 = steps[prevIndex];
+            prevVertex = new Vector3f(steps[prevIndex]);
         }
-        if (point2[0] == point1[0] &&
-            point2[1] == point1[1] &&
-            point2[2] == point1[2]) {
+        if (nextVertex.equals(curVertex)) {
             nextIndex = prevIndex == 3 ? 0 : prevIndex + 1;
-            point2 = steps[nextIndex];
+            nextVertex = new Vector3f(steps[nextIndex]);
         }
 
-        Vector3f prevPoint = new Vector3f(point0[0], point0[1], point0[2]);
-        Vector3f curPoint = new Vector3f(point1[0], point1[1], point1[2]);
-        Vector3f nextPoint = new Vector3f(point2[0], point2[1], point2[2]);
-        Vector3f normals = new Vector3f((prevPoint.x - curPoint.x) * (nextPoint.x - curPoint.x),
-            (prevPoint.y - curPoint.y) * (nextPoint.y - curPoint.y),
-            (prevPoint.z - curPoint.z) * (nextPoint.z - curPoint.z));
+        prevVertex.sub(curVertex);
+        nextVertex.sub(curVertex);
+
+        Vector3f normals = new Vector3f();
+        normals.cross(prevVertex, nextVertex);
 
         return normals;
     }
@@ -155,9 +153,8 @@ public class CarpentryModelData {
     }
 
     public void addInstruction(EnumFacing facing, float x, float y, float z, float u, float v,
-        float normalX, float normalY, float normalZ) {
+                               float normalX, float normalY, float normalZ) {
         float[] instructions = new float[]{x, y, z, u, v, normalX, normalY, normalZ};
-
         float[][][] quadArray = masterData.get(facing);
         ArrayList<float[][]> quads = Lists.newArrayList(quadArray);
         if (quads.isEmpty())
