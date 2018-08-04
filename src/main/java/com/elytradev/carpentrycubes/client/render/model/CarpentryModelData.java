@@ -119,7 +119,7 @@ public class CarpentryModelData {
             prevVertex = new Vector3f(steps[prevIndex]);
         }
         if (nextVertex.equals(curVertex)) {
-            nextIndex = prevIndex == 3 ? 0 : prevIndex + 1;
+            nextIndex = nextIndex == 3 ? 0 : nextIndex + 1;
             nextVertex = new Vector3f(steps[nextIndex]);
         }
 
@@ -128,7 +128,7 @@ public class CarpentryModelData {
 
         Vector3f normals = new Vector3f();
         normals.cross(prevVertex, nextVertex);
-
+        normals.normalize();
         return normals;
     }
 
@@ -155,6 +155,7 @@ public class CarpentryModelData {
     public void addInstruction(EnumFacing facing, float x, float y, float z, float u, float v,
                                float normalX, float normalY, float normalZ) {
         float[] instructions = new float[]{x, y, z, u, v, normalX, normalY, normalZ};
+
         float[][][] quadArray = masterData.get(facing);
         ArrayList<float[][]> quads = Lists.newArrayList(quadArray);
         if (quads.isEmpty())

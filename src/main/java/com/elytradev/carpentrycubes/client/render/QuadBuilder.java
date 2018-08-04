@@ -30,7 +30,7 @@ public class QuadBuilder {
         this.builder.setTexture(sprite);
         this.builder.setQuadTint(tintIndex);
         this.builder.setQuadOrientation(side);
-        this.builder.setApplyDiffuseLighting(true);
+        this.builder.setApplyDiffuseLighting(false);
         this.builder.setContractUVs(true);
     }
 
