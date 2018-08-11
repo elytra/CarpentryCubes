@@ -83,9 +83,9 @@ public class CarpentryModelData {
                 for (int quad = 0; quad < rawQuads.length; quad++) {
                     QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, newFace, tintIndex);
                     float[][] steps = rawQuads[quad];
+                    Vector3f normals = genNormals(steps);
                     for (int i = 0; i < steps.length; i++) {
                         float[] instructions = steps[i];
-                        Vector3f normals = genNormals(steps, i);
                         float[] uVs = carpentryModel.getUVs(face, newFace, facing, state, instructions[3], instructions[4]);
                         float u, v;
                         u = sprite.getInterpolatedU(uVs[0]);
@@ -105,22 +105,23 @@ public class CarpentryModelData {
         return new ModelDataQuads(generalQuads, faceQuads);
     }
 
-    public Vector3f genNormals(float[][] steps, int curIndex) {
-        int prevIndex = curIndex == 0 ? 3 : curIndex - 1;
-        int nextIndex = curIndex == 3 ? 0 : curIndex + 1;
+    public Vector3f genNormals(float[][] points) {
+        int prevPoint = 3;
+        int curPoint = 0;
+        int nextPoint = 1;
 
-        Vector3f prevVertex = new Vector3f(steps[prevIndex]);
-        Vector3f curVertex = new Vector3f(steps[curIndex]);
-        Vector3f nextVertex = new Vector3f(steps[nextIndex]);
+        Vector3f prevVertex = new Vector3f(points[prevPoint]);
+        Vector3f curVertex = new Vector3f(points[curPoint]);
+        Vector3f nextVertex = new Vector3f(points[nextPoint]);
 
         // Sanity checks for irregular quads.
         if (prevVertex.equals(curVertex)) {
-            prevIndex = prevIndex == 0 ? 3 : prevIndex - 1;
-            prevVertex = new Vector3f(steps[prevIndex]);
+            prevPoint = 2;
+            prevVertex = new Vector3f(points[prevPoint]);
         }
         if (nextVertex.equals(curVertex)) {
-            nextIndex = nextIndex == 3 ? 0 : nextIndex + 1;
-            nextVertex = new Vector3f(steps[nextIndex]);
+            nextPoint = 2;
+            nextVertex = new Vector3f(points[nextPoint]);
         }
 
         prevVertex.sub(curVertex);
