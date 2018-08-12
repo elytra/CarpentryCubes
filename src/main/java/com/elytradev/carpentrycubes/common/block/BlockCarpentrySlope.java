@@ -1,7 +1,7 @@
 package com.elytradev.carpentrycubes.common.block;
 
 import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
-import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedEnumProperty;
 import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer.EnumToolMode;
@@ -141,43 +141,18 @@ public class BlockCarpentrySlope extends BlockCarpentry {
         return state;
     }
 
-    @Override
-    public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullBlock(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public int getLightOpacity(IBlockState state) {
-        return 0;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing side) {
-        if (access != null && pos != null) {
-            TileEntity tileEntity = access.getTileEntity(pos);
-            if (tileEntity instanceof TileCarpentry) {
-                TileCarpentry tileCarpentry = (TileCarpentry) tileEntity;
-                return tileCarpentry.getCoverState().getBlock().shouldSideBeRendered(tileCarpentry.getCoverState(), access, pos, side);
-            }
-        }
-
-        return super.shouldSideBeRendered(state, access, pos, side);
-    }
+    //@SideOnly(Side.CLIENT)
+    //public boolean shouldSideBeRendered(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing side) {
+    //    if (access != null && pos != null) {
+    //        TileEntity tileEntity = access.getTileEntity(pos);
+    //        if (tileEntity instanceof TileCarpentry) {
+    //            TileCarpentry tileCarpentry = (TileCarpentry) tileEntity;
+    //            return tileCarpentry.getCoverState().getBlock().shouldSideBeRendered(tileCarpentry.getCoverState(), access, pos, side);
+    //        }
+    //    }
+//
+    //    return super.shouldSideBeRendered(state, access, pos, side);
+    //}
 
     @Nullable
     @Override

@@ -1,14 +1,16 @@
 package com.elytradev.carpentrycubes.client.render;
 
-import java.util.Optional;
-import javax.annotation.Nullable;
-import javax.vecmath.Vector4f;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.common.model.TRSRTransformation;
+
+import javax.annotation.Nullable;
+import javax.vecmath.Vector4f;
+import java.util.Optional;
 
 /**
  * Small utility class for building quads, makes things less painful.
@@ -18,19 +20,17 @@ public class QuadBuilder {
     private UnpackedBakedQuad.Builder builder;
     private VertexFormat format;
     private Optional<TRSRTransformation> transform;
-    private EnumFacing side;
 
-    public QuadBuilder(VertexFormat format, @Nullable TRSRTransformation transform, TextureAtlasSprite sprite,
-        EnumFacing side, int tintIndex) {
+    public QuadBuilder(@Nullable TRSRTransformation transform, TextureAtlasSprite sprite,
+                       EnumFacing side, int tintIndex) {
+        this.format = DefaultVertexFormats.ITEM;
         this.builder = new UnpackedBakedQuad.Builder(format);
-        this.format = format;
         this.transform = Optional.of(transform);
-        this.side = side;
 
         this.builder.setTexture(sprite);
         this.builder.setQuadTint(tintIndex);
         this.builder.setQuadOrientation(side);
-        this.builder.setApplyDiffuseLighting(false);
+        this.builder.setApplyDiffuseLighting(true);
         this.builder.setContractUVs(true);
     }
 
@@ -59,7 +59,7 @@ public class QuadBuilder {
                         break;
                     }
                 case NORMAL:
-                    builder.put(e, normalX, normalY, normalZ, 0f);
+                    builder.put(e, normalX, normalY, normalZ, 0F);
                     break;
                 default:
                     builder.put(e);

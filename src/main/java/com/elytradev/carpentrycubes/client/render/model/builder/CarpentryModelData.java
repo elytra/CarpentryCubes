@@ -1,4 +1,4 @@
-package com.elytradev.carpentrycubes.client.render.model;
+package com.elytradev.carpentrycubes.client.render.model.builder;
 
 import com.elytradev.carpentrycubes.client.render.QuadBuilder;
 import com.google.common.collect.Lists;
@@ -6,17 +6,14 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
 
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Stores quad info that can be modified with given transforms, tintindices, and face sprites.
@@ -24,7 +21,7 @@ import java.util.stream.Collectors;
 public class CarpentryModelData {
 
     private final ICarpentryModel<?> carpentryModel;
-    private final Map<EnumFacing, float[][][]> masterData = Arrays.stream(EnumFacing.values()).collect(Collectors.toMap(e -> e, e -> new float[0][0][0]));
+    private final Map<EnumFacing, List<CarpentryQuad>> quads = Maps.newHashMap();
 
     private IBlockState state;
     private EnumFacing facing = EnumFacing.NORTH;
@@ -69,30 +66,30 @@ public class CarpentryModelData {
     public ModelDataQuads buildModel() {
         List<BakedQuad> generalQuads = Lists.newArrayList();
         Map<EnumFacing, List<BakedQuad>> faceQuads = Maps.newHashMap();
-        for (int faceIndex = 0; faceIndex < faceSprites.length; faceIndex++) {
-            EnumFacing face = EnumFacing.values()[faceIndex];
-            EnumFacing newFace = transform.rotate(face);
 
-            int size = faceSprites[newFace.getIndex()].size();
-            for (int sideQuad = 0; sideQuad < size; sideQuad++) {
-                TextureAtlasSprite sprite = faceSprites[newFace.getIndex()].get(sideQuad);
-                int tintIndex = tintIndices[newFace.getIndex()].get(sideQuad);
-                float[][][] rawQuads = masterData.get(face);
+        for (Map.Entry<EnumFacing, List<CarpentryQuad>> entry : this.quads.entrySet()) {
+            EnumFacing oldFace = entry.getKey();
+            EnumFacing newFace = transform.rotate(oldFace);
+            List<CarpentryQuad> quads = entry.getValue();
+
+            for (CarpentryQuad quad : quads) {
                 faceQuads.putIfAbsent(newFace, Lists.newArrayList());
 
-                for (int quad = 0; quad < rawQuads.length; quad++) {
-                    QuadBuilder quadBuilder = new QuadBuilder(DefaultVertexFormats.ITEM, transform, sprite, newFace, tintIndex);
-                    float[][] steps = rawQuads[quad];
-                    Vector3f normals = genNormals(steps);
-                    for (int i = 0; i < steps.length; i++) {
-                        float[] instructions = steps[i];
-                        float[] uVs = carpentryModel.getUVs(face, newFace, facing, state, instructions[3], instructions[4]);
-                        float u, v;
-                        u = sprite.getInterpolatedU(uVs[0]);
-                        v = sprite.getInterpolatedV(uVs[1]);
+                int spritesForFace = this.faceSprites[newFace.getIndex()].size();
+                for (int spriteIndex = 0; spriteIndex < spritesForFace; spriteIndex++) {
+                    TextureAtlasSprite sprite = this.faceSprites[newFace.getIndex()].get(spriteIndex);
+                    int tintIndex = this.tintIndices[newFace.getIndex()].get(spriteIndex);
 
-                        quadBuilder.putVertex(instructions[0], instructions[1], instructions[2], u, v,
-                                normals.x, normals.y, normals.z);
+                    QuadBuilder quadBuilder = new QuadBuilder(transform, sprite, newFace, tintIndex);
+                    for (CarpentryVertex vertex : quad.getVertices()) {
+                        float[] UVs = vertex.getUVs();
+                        //UVs = carpentryModel.getUVs(face, facing, state, UVs[0], UVs[1]);
+                        float u, v;
+                        u = sprite.getInterpolatedU(UVs[0]);
+                        v = sprite.getInterpolatedV(UVs[1]);
+
+                        quadBuilder.putVertex(vertex.getX(), vertex.getY(), vertex.getZ(), u, v,
+                                vertex.getNormalX(), vertex.getNormalY(), vertex.getNormalZ());
                     }
                     BakedQuad builtQuad = quadBuilder.build();
                     generalQuads.add(builtQuad);
@@ -103,34 +100,6 @@ public class CarpentryModelData {
 
         setup();
         return new ModelDataQuads(generalQuads, faceQuads);
-    }
-
-    public Vector3f genNormals(float[][] points) {
-        int prevPoint = 3;
-        int curPoint = 0;
-        int nextPoint = 1;
-
-        Vector3f prevVertex = new Vector3f(points[prevPoint]);
-        Vector3f curVertex = new Vector3f(points[curPoint]);
-        Vector3f nextVertex = new Vector3f(points[nextPoint]);
-
-        // Sanity checks for irregular quads.
-        if (prevVertex.equals(curVertex)) {
-            prevPoint = 2;
-            prevVertex = new Vector3f(points[prevPoint]);
-        }
-        if (nextVertex.equals(curVertex)) {
-            nextPoint = 2;
-            nextVertex = new Vector3f(points[nextPoint]);
-        }
-
-        prevVertex.sub(curVertex);
-        nextVertex.sub(curVertex);
-
-        Vector3f normals = new Vector3f();
-        normals.cross(prevVertex, nextVertex);
-        normals.normalize();
-        return normals;
     }
 
     private void setup() {
@@ -150,38 +119,20 @@ public class CarpentryModelData {
     }
 
     public void addInstruction(EnumFacing facing, float x, float y, float z, float u, float v) {
-        this.addInstruction(facing, x, y, z, u, v, 0, 0, 0);
-    }
+        float[] data = new float[]{x, y, z, u, v};
 
-    public void addInstruction(EnumFacing facing, float x, float y, float z, float u, float v,
-                               float normalX, float normalY, float normalZ) {
-        float[] instructions = new float[]{x, y, z, u, v, normalX, normalY, normalZ};
+        if (!this.quads.containsKey(facing))
+            this.quads.put(facing, new ArrayList<>());
 
-        float[][][] quadArray = masterData.get(facing);
-        ArrayList<float[][]> quads = Lists.newArrayList(quadArray);
-        if (quads.isEmpty())
-            quads.add(new float[0][0]);
-        if (quads.get(quads.size() - 1).length != 4) {
-            ArrayList<float[]> steps = Lists.newArrayList(quads.get(quads.size() - 1));
-            steps.add(instructions);
-            float[][] stepsArray = new float[steps.size()][];
-            steps.toArray(stepsArray);
-            stepsArray[steps.size() - 1] = instructions;
-            quads.set(quads.size() - 1, stepsArray);
-        } else {
-            ArrayList<float[]> steps = Lists.newArrayList();
-            steps.add(instructions);
-            float[][] stepsArray = new float[steps.size()][];
-            steps.toArray(stepsArray);
-            quads.add(stepsArray);
-        }
-        quadArray = new float[quads.size()][][];
-        quads.toArray(quadArray);
-        masterData.replace(facing, quadArray);
+        List<CarpentryQuad> faceQuads = this.quads.get(facing);
+        if (faceQuads.isEmpty() || faceQuads.get(faceQuads.size() - 1).isComplete())
+            faceQuads.add(new CarpentryQuad(facing));
+
+        CarpentryQuad selectedQuad = faceQuads.get(faceQuads.size() - 1);
+        selectedQuad.setVertex(selectedQuad.getNextVertex(), data);
     }
 
     public class ModelDataQuads {
-
         private final List<BakedQuad> generalQuads;
         private final Map<EnumFacing, List<BakedQuad>> faceQuads;
 

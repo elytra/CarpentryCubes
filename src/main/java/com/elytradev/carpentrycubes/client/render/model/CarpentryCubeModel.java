@@ -1,5 +1,7 @@
 package com.elytradev.carpentrycubes.client.render.model;
 
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
+import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import java.util.ArrayList;
 import javax.vecmath.Vector3f;
@@ -13,14 +15,14 @@ public class CarpentryCubeModel implements ICarpentryModel<BlockCarpentry> {
 
     @Override
     public CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos,
-        ArrayList<Integer>[] tintIndices, ArrayList<TextureAtlasSprite>[] faceSprites,
-        ArrayList<Vector3f>[] quadOffsets) {
+                                                      ArrayList<Integer>[] tintIndices, ArrayList<TextureAtlasSprite>[] faceSprites,
+                                                      ArrayList<Vector3f>[] quadOffsets) {
         return null;
     }
 
     @Override
-    public float[] getUVs(EnumFacing oldFace, EnumFacing newFace, EnumFacing facing, IBlockState state, float oU,
-        float oV) {
+    public float[] getUVs(EnumFacing oldFace, EnumFacing facing, IBlockState state, float oU,
+                          float oV) {
         return new float[0];
     }
 

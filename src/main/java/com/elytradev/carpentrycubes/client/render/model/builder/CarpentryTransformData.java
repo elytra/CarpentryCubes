@@ -1,4 +1,4 @@
-package com.elytradev.carpentrycubes.client.render.model;
+package com.elytradev.carpentrycubes.client.render.model.builder;
 
 import net.minecraftforge.common.model.TRSRTransformation;
 import org.lwjgl.util.vector.Vector3f;
@@ -17,13 +17,13 @@ public class CarpentryTransformData {
     }
 
     public CarpentryTransformData(javax.vecmath.Vector3f translation,
-        javax.vecmath.Vector3f rotation) {
+                                  javax.vecmath.Vector3f rotation) {
         this.translation = new Vector3f(translation.x, translation.y, translation.z);
         this.rotation = new Vector3f(rotation.x, rotation.y, rotation.z);
     }
 
     public CarpentryTransformData(javax.vecmath.Vector3f translation,
-        javax.vecmath.Vector3f rotation, javax.vecmath.Vector3f scale) {
+                                  javax.vecmath.Vector3f rotation, javax.vecmath.Vector3f scale) {
         this.translation = new Vector3f(translation.x, translation.y, translation.z);
         this.rotation = new Vector3f(rotation.x, rotation.y, rotation.z);
         this.scale = new Vector3f(scale.x, scale.y, scale.z);
@@ -33,13 +33,13 @@ public class CarpentryTransformData {
         return translation;
     }
 
+    public CarpentryTransformData setTranslation(javax.vecmath.Vector3f translation) {
+        return this.setTranslation(new Vector3f(translation.x, translation.y, translation.z));
+    }
+
     public CarpentryTransformData setTranslation(Vector3f translation) {
         this.translation = translation;
         return this;
-    }
-
-    public CarpentryTransformData setTranslation(javax.vecmath.Vector3f translation) {
-        return this.setTranslation(new Vector3f(translation.x, translation.y, translation.z));
     }
 
     public CarpentryTransformData setTranslation(float x, float y, float z) {
@@ -50,13 +50,13 @@ public class CarpentryTransformData {
         return rotation;
     }
 
+    public CarpentryTransformData setRotation(javax.vecmath.Vector3f rotation) {
+        return this.setRotation(new Vector3f(rotation.x, rotation.y, rotation.z));
+    }
+
     public CarpentryTransformData setRotation(Vector3f rotation) {
         this.rotation = rotation;
         return this;
-    }
-
-    public CarpentryTransformData setRotation(javax.vecmath.Vector3f rotation) {
-        return this.setRotation(new Vector3f(rotation.x, rotation.y, rotation.z));
     }
 
     public CarpentryTransformData setRotation(float x, float y, float z) {
@@ -67,13 +67,13 @@ public class CarpentryTransformData {
         return scale;
     }
 
+    public CarpentryTransformData setScale(javax.vecmath.Vector3f scale) {
+        return this.setScale(new Vector3f(scale.x, scale.y, scale.z));
+    }
+
     public CarpentryTransformData setScale(Vector3f scale) {
         this.scale = scale;
         return this;
-    }
-
-    public CarpentryTransformData setScale(javax.vecmath.Vector3f scale) {
-        return this.setScale(new Vector3f(scale.x, scale.y, scale.z));
     }
 
     public CarpentryTransformData setScale(float x, float y, float z) {
@@ -82,13 +82,13 @@ public class CarpentryTransformData {
 
     public TRSRTransformation asTRSRTransform() {
         if (translation.equals(new Vector3f(0, 0, 0)) && scale.equals(new Vector3f(1, 1, 1))
-            && rotation.equals(new Vector3f(0, 0, 0))) {
+                && rotation.equals(new Vector3f(0, 0, 0))) {
             return TRSRTransformation.identity();
         }
 
         return TRSRTransformation.blockCenterToCorner(new TRSRTransformation(
-            TRSRTransformation.toVecmath(translation),
-            TRSRTransformation.quatFromXYZDegrees(TRSRTransformation.toVecmath(this.rotation)),
-            TRSRTransformation.toVecmath(scale), null));
+                TRSRTransformation.toVecmath(translation),
+                TRSRTransformation.quatFromXYZDegrees(TRSRTransformation.toVecmath(this.rotation)),
+                TRSRTransformation.toVecmath(scale), null));
     }
 }

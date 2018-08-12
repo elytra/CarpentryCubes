@@ -1,6 +1,6 @@
 package com.elytradev.carpentrycubes.client.proxy;
 
-import com.elytradev.carpentrycubes.client.render.model.CarpentryModelLoader;
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;

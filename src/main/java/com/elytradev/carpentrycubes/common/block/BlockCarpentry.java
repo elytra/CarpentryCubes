@@ -1,6 +1,6 @@
 package com.elytradev.carpentrycubes.common.block;
 
-import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockAccessProperty;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockPosProperty;
@@ -8,7 +8,6 @@ import com.elytradev.carpentrycubes.common.block.prop.UnlistedBlockStateProperty
 import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer.EnumToolMode;
 import com.elytradev.carpentrycubes.common.network.TileUpdateMessage;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
-import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -31,6 +30,8 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import org.apache.commons.lang3.ArrayUtils;
 
+import javax.annotation.Nullable;
+
 public class BlockCarpentry extends BlockContainer {
 
     public static final IUnlistedProperty<IBlockState> COVERSTATE = UnlistedBlockStateProperty.create("cover");
@@ -51,7 +52,7 @@ public class BlockCarpentry extends BlockContainer {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-        EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+                                    EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (worldIn.getTileEntity(pos) instanceof TileCarpentry) {
             TileCarpentry tileCarpentry = (TileCarpentry) worldIn.getTileEntity(pos);
             ItemStack heldItem = playerIn.getHeldItem(hand);
@@ -69,7 +70,7 @@ public class BlockCarpentry extends BlockContainer {
                 }
             }
             if (!worldIn.isRemote && Block.getBlockFromItem(heldItem.getItem()) != Blocks.AIR
-                && !playerIn.isSneaking()) {
+                    && !playerIn.isSneaking()) {
                 Block block = Block.getBlockFromItem(heldItem.getItem());
                 if (block instanceof BlockCarpentry)
                     return false;
@@ -89,7 +90,7 @@ public class BlockCarpentry extends BlockContainer {
     @Override
     protected BlockStateContainer createBlockState() {
         return new ExtendedBlockState(this, getProperties(), ArrayUtils.addAll(new IUnlistedProperty[]{COVERSTATE,
-            BLOCK_ACCESS, POS}, getUnlistedProperties()));
+                BLOCK_ACCESS, POS}, getUnlistedProperties()));
     }
 
     @Override
@@ -102,8 +103,8 @@ public class BlockCarpentry extends BlockContainer {
         if (state instanceof IExtendedBlockState && world.getTileEntity(pos) instanceof TileCarpentry) {
             TileCarpentry tileCarpentry = (TileCarpentry) world.getTileEntity(pos);
             state = ((IExtendedBlockState) state).withProperty(COVERSTATE, tileCarpentry.getCoverState())
-                .withProperty(BLOCK_ACCESS, world)
-                .withProperty(POS, pos);
+                    .withProperty(BLOCK_ACCESS, world)
+                    .withProperty(POS, pos);
         }
         return super.getExtendedState(state, world, pos);
     }
@@ -122,6 +123,17 @@ public class BlockCarpentry extends BlockContainer {
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
         return true;
+    }
+
+    @Override
+    public boolean isTranslucent(IBlockState state) {
+        if (state != null && state.getBlock() instanceof BlockCarpentry) {
+            IExtendedBlockState extendedState = (IExtendedBlockState) state;
+            IBlockState coverState = extendedState.getValue(BlockCarpentry.COVERSTATE);
+            return coverState.isTranslucent();
+        }
+
+        return super.isTranslucent(state);
     }
 
     public BlockRenderLayer getRenderLayer(IBlockAccess access, BlockPos pos) {
