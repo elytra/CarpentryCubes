@@ -12,6 +12,7 @@ import net.minecraftforge.common.model.TRSRTransformation;
 
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +67,7 @@ public class CarpentryModelData {
     public ModelDataQuads buildModel() {
         List<BakedQuad> generalQuads = Lists.newArrayList();
         Map<EnumFacing, List<BakedQuad>> faceQuads = Maps.newHashMap();
+        Arrays.stream(EnumFacing.values()).forEach((o) -> faceQuads.put(o, Lists.newArrayList()));
 
         for (Map.Entry<EnumFacing, List<CarpentryQuad>> entry : this.quads.entrySet()) {
             EnumFacing oldFace = entry.getKey();

@@ -59,7 +59,13 @@ public class QuadBuilder {
                         break;
                     }
                 case NORMAL:
-                    builder.put(e, normalX, normalY, normalZ, 0F);
+                    Vector4f normals = new Vector4f(normalX, normalY, normalZ, 0F);
+                    if (transform.isPresent()) {
+                        transform.get().getMatrix().transform(normals);
+                        builder.put(e, normals.x, normals.y, normals.z, 0F);
+                    } else {
+                        builder.put(e, normalX, normalY, normalZ, 0F);
+                    }
                     break;
                 default:
                     builder.put(e);

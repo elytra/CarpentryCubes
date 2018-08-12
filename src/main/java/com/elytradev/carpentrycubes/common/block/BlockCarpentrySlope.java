@@ -8,8 +8,6 @@ import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer.EnumToolMode
 import com.elytradev.carpentrycubes.common.network.TileUpdateMessage;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
-import java.util.Objects;
-import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
@@ -31,6 +29,9 @@ import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+import java.util.Objects;
+
 public class BlockCarpentrySlope extends BlockCarpentry {
 
     public static PropertyDirection PRIMARY_DIRECTION = PropertyDirection.create("facing");
@@ -44,7 +45,7 @@ public class BlockCarpentrySlope extends BlockCarpentry {
 
     @Override
     public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-        float hitZ, int meta, EntityLivingBase placer) {
+                                            float hitZ, int meta, EntityLivingBase placer) {
         // TODO: Check neighbouring positions for any other slopes.
 
         return this.getDefaultState().withProperty(PRIMARY_DIRECTION, placer.getHorizontalFacing().getOpposite());
@@ -57,18 +58,18 @@ public class BlockCarpentrySlope extends BlockCarpentry {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
-        EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+                                    EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         boolean result = super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         if (!worldIn.isRemote) {
             ItemStack heldItem = playerIn.getHeldItem(hand);
             IBlockState blockState = worldIn.getBlockState(pos);
             if (blockState.getBlock() instanceof BlockCarpentrySlope
-                && Objects.equals(heldItem.getItem(), CarpentryContent.itemHammer)) {
+                    && Objects.equals(heldItem.getItem(), CarpentryContent.itemHammer)) {
 
                 EnumToolMode toolMode = EnumToolMode.byId(heldItem.getMetadata());
                 TileEntity tileEntity = worldIn.getTileEntity(pos);
                 TileCarpentrySlope carpentrySlope =
-                    tileEntity instanceof TileCarpentrySlope ? (TileCarpentrySlope) tileEntity : null;
+                        tileEntity instanceof TileCarpentrySlope ? (TileCarpentrySlope) tileEntity : null;
                 if (carpentrySlope != null) {
                     switch (toolMode) {
                         case TWEAK:
@@ -135,24 +136,39 @@ public class BlockCarpentrySlope extends BlockCarpentry {
             TileCarpentrySlope tileCarpentrySlope = (TileCarpentrySlope) tile;
             IExtendedBlockState extendedState = (IExtendedBlockState) state;
             state = extendedState.withProperty(SECONDARY_DIRECTION, tileCarpentrySlope.getSecondaryDirection())
-                .withProperty(SHAPE, tileCarpentrySlope.getShape())
-                .withProperty(ORIENTATION, tileCarpentrySlope.getOrientation());
+                    .withProperty(SHAPE, tileCarpentrySlope.getShape())
+                    .withProperty(ORIENTATION, tileCarpentrySlope.getOrientation());
         }
         return state;
     }
 
-    //@SideOnly(Side.CLIENT)
-    //public boolean shouldSideBeRendered(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing side) {
-    //    if (access != null && pos != null) {
-    //        TileEntity tileEntity = access.getTileEntity(pos);
-    //        if (tileEntity instanceof TileCarpentry) {
-    //            TileCarpentry tileCarpentry = (TileCarpentry) tileEntity;
-    //            return tileCarpentry.getCoverState().getBlock().shouldSideBeRendered(tileCarpentry.getCoverState(), access, pos, side);
-    //        }
-    //    }
-//
-    //    return super.shouldSideBeRendered(state, access, pos, side);
-    //}
+    @Override
+    public boolean isFullBlock(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isFullCube(IBlockState state) {
+        return false;
+    }
+
+    @Override
+    public boolean isOpaqueCube(IBlockState state) {
+        return false;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing side) {
+        if (access != null && pos != null) {
+            TileEntity tileEntity = access.getTileEntity(pos);
+            if (tileEntity instanceof TileCarpentry) {
+                TileCarpentry tileCarpentry = (TileCarpentry) tileEntity;
+                return tileCarpentry.getCoverState().getBlock().shouldSideBeRendered(tileCarpentry.getCoverState(), access, pos, side);
+            }
+        }
+
+        return super.shouldSideBeRendered(state, access, pos, side);
+    }
 
     @Nullable
     @Override

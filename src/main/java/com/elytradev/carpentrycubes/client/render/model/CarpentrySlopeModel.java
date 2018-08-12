@@ -131,38 +131,6 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
     public CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos,
                                                       ArrayList<Integer>[] tintIndices, ArrayList<TextureAtlasSprite>[] faceSprites,
                                                       ArrayList<Vector3f>[] quadOffsets) {
-        straightSlopeModelData = new CarpentryModelData(getInstance());
-
-        straightSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 0, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 0, 16, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 1, 16, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 1, 0, 0);
-
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 1, 1, 0, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 0, 1, 0, 16, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 0, 1, 1, 16, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 1, 1, 1, 0, 0);
-
-        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 1, 0, 0, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 1, 0, 16, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 0, 0, 16, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 0, 16);
-
-        straightSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 0, 1, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 0, 1, 16, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 1, 1, 16, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 1, 1, 0, 0);
-
-        straightSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 0, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.WEST, 0, 0, 1, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.WEST, 0, 1, 1, 16, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.WEST, 0, 1, 0, 16, 0);
-
-        straightSlopeModelData.addInstruction(EnumFacing.EAST, 1, 1, 0, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.EAST, 1, 1, 1, 0, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 1, 16, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.EAST, 1, 0, 0, 16, 16);
-
         EnumFacing facing = state.getValue(BlockCarpentrySlope.PRIMARY_DIRECTION);
         EnumOrientation orientation = state instanceof IExtendedBlockState ?
                 ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.ORIENTATION)
