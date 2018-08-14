@@ -17,7 +17,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
+import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
+import javax.vecmath.Vector4f;
 import java.util.ArrayList;
 
 public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope> {
@@ -38,10 +40,10 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
         straightSlopeModelData.addInstruction(EnumFacing.DOWN, 1, 0, 1, 16, 0);
         straightSlopeModelData.addInstruction(EnumFacing.DOWN, 0, 0, 1, 0, 0);
 
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 1, 0, 0, 0, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 0, 0, 0, 16, 16);
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 0, 1, 1, 16, 0);
-        straightSlopeModelData.addInstruction(EnumFacing.UP, 1, 1, 1, 0, 0);
+        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 0, 0, 0, 16);
+        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 0, 0, 16, 16);
+        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 0, 1, 1, 16, 0);
+        straightSlopeModelData.addInstruction(EnumFacing.NORTH, 1, 1, 1, 0, 0);
 
         straightSlopeModelData.addInstruction(EnumFacing.SOUTH, 0, 0, 1, 0, 16);
         straightSlopeModelData.addInstruction(EnumFacing.SOUTH, 1, 0, 1, 16, 16);
@@ -201,7 +203,6 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
             if (tile instanceof TileCarpentrySlope) {
                 TileCarpentrySlope slope = (TileCarpentrySlope) tile;
                 if (slope.getShape() != EnumShape.STRAIGHT) {
-
                     switch (slope.getSecondaryDirection()) {
                         case NORTH:
                             xRot += 0;
@@ -240,46 +241,18 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
     }
 
     @Override
-    public float[] getUVs(EnumFacing oldFace, EnumFacing facing,
-                          IBlockState state, float oU, float oV) {
-        EnumOrientation orientation = EnumOrientation.GROUND;
-        EnumShape shape = EnumShape.STRAIGHT;
+    public float[] getUVs(EnumFacing originalFace, EnumFacing facing,
+                          TRSRTransformation transform, IBlockState state, float oU, float oV) {
+        TRSRTransformation global = new TRSRTransformation(transform.getMatrix());
+        Matrix4f uv = global.getUVLockTransform(originalFace).getMatrix();
+        Vector4f vec = new Vector4f(0, 0, 0, 1);
+        vec.x = oU / 16;
+        vec.y = oV / 16;
+        uv.transform(vec);
+        float uOut = 16 * vec.x;
+        float vOut = 16 * vec.y;
 
-        if (state instanceof IExtendedBlockState) {
-            IExtendedBlockState extendedState = (IExtendedBlockState) state;
-            orientation = extendedState.getValue(BlockCarpentrySlope.ORIENTATION);
-            shape = extendedState.getValue(BlockCarpentrySlope.SHAPE);
-        }
-
-        Boolean onCeiling = orientation == EnumOrientation.CEILING;
-        Boolean onWall = orientation == EnumOrientation.WALL;
-        if (oldFace == EnumFacing.DOWN || orientation != EnumOrientation.GROUND) {
-            float angle = orientation.getZRotation();
-            if (oldFace == EnumFacing.DOWN) {
-                if (onCeiling) {
-                    angle += 180;
-                    if (shape == EnumShape.INNER) {
-                        angle += 90;
-                    } else if (shape == EnumShape.OUTER) {
-                        angle -= 90;
-                    }
-
-                    angle += facing.getHorizontalAngle();
-                } else if (!onWall) {
-                    angle += -facing.getOpposite().getHorizontalAngle();
-                }
-            }
-
-            double uPoint = (oU / 16) - 0.5;
-            double vPoint = (oV / 16) - 0.5;
-            double cos = Math.cos(Math.toRadians(angle));
-            double sin = Math.sin(Math.toRadians(angle));
-            float u = (float) (((cos * uPoint) - (sin * vPoint)) + 0.5F) * 16F;
-            float v = (float) (((sin * uPoint) + (cos * vPoint)) + 0.5F) * 16F;
-            return new float[]{u, v};
-        }
-
-        return new float[]{oU, oV};
+        return new float[]{uOut, vOut};
     }
 
     @Override

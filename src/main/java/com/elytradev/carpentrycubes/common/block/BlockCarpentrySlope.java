@@ -194,6 +194,14 @@ public class BlockCarpentrySlope extends BlockCarpentry {
         public String getName() {
             return this.name;
         }
+
+        public boolean isOuter() {
+            return this == OUTER;
+        }
+
+        public boolean isInner() {
+            return this == INNER;
+        }
     }
 
     public enum EnumOrientation implements IStringSerializable {

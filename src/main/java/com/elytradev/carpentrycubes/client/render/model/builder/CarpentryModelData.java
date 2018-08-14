@@ -85,11 +85,10 @@ public class CarpentryModelData {
                     QuadBuilder quadBuilder = new QuadBuilder(transform, sprite, newFace, tintIndex);
                     for (CarpentryVertex vertex : quad.getVertices()) {
                         float[] UVs = vertex.getUVs();
-                        //UVs = carpentryModel.getUVs(face, facing, state, UVs[0], UVs[1]);
+                        UVs = carpentryModel.getUVs(oldFace, facing, transform, state, UVs[0], UVs[1]);
                         float u, v;
                         u = sprite.getInterpolatedU(UVs[0]);
                         v = sprite.getInterpolatedV(UVs[1]);
-
                         quadBuilder.putVertex(vertex.getX(), vertex.getY(), vertex.getZ(), u, v,
                                 vertex.getNormalX(), vertex.getNormalY(), vertex.getNormalZ());
                     }
