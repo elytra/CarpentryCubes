@@ -1,6 +1,10 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.model.TRSRTransformation;
+
 import javax.vecmath.Vector3f;
+import javax.vecmath.Vector4f;
 import java.util.Arrays;
 
 public class CarpentryVertex {
@@ -21,8 +25,44 @@ public class CarpentryVertex {
         return new Vector3f(data);
     }
 
-    public float[] getUVs() {
-        return new float[]{this.data[3], this.data[4]};
+    public Vector3f getPosition(TRSRTransformation transform) {
+        Vector3f position = this.getPosition();
+        Vector4f transformedPosition = new Vector4f(position.getX(), position.getY(), position.getZ(), 1);
+        transform.getMatrix().transform(transformedPosition);
+        return new Vector3f(transformedPosition.getX(), transformedPosition.getY(), transformedPosition.getZ());
+    }
+
+    public float[] getUVs(TRSRTransformation transform) {
+        Vector3f pos = this.getPosition(transform);
+        EnumFacing face = transform.rotate(parent.getFace());
+        float u = 0, v = 0;
+        switch (face) {
+            case DOWN:
+                u = pos.getX() * 16F;
+                v = -16F * (pos.getZ() - 1F);
+                break;
+            case UP:
+                u = pos.getX() * 16F;
+                v = -16F * (pos.getZ() - 1F);
+                break;
+            case NORTH:
+                u = -16F * (pos.getX() - 1F);
+                v = -16F * (pos.getY() - 1F);
+                break;
+            case SOUTH:
+                u = 16F * pos.getX();
+                v = -16F * (pos.getY() - 1F);
+                break;
+            case WEST:
+                u = 16F * pos.getZ();
+                v = -16F * (pos.getY() - 1F);
+                break;
+            case EAST:
+                u = -16F * (pos.getZ() - 1F);
+                v = -16F * (pos.getY() - 1F);
+                break;
+        }
+        return new float[]{u, v};
     }
 
     public float getX() {

@@ -33,7 +33,7 @@ public class CarpentryQuad {
     }
 
     public Vector3f getNormals() {
-        if (true) {
+        if (this.normals == null) {
             // Generate normals
             CarpentryVertex[] vertices = this.getVertices();
 

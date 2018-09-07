@@ -13,12 +13,10 @@ import java.util.ArrayList;
 
 public interface ICarpentryModel<B extends BlockCarpentry> {
 
-    CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos,
-                                               ArrayList<Integer>[] tintIndices,
-                                               ArrayList<TextureAtlasSprite>[] faceSprites,
-                                               ArrayList<Vector3f>[] quadOffsets);
 
-    float[] getUVs(EnumFacing originalFace, EnumFacing facing, TRSRTransformation transform, IBlockState state, float oU, float oV);
+    CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos,
+                                               ArrayList<Integer>[] tintIndices, ArrayList<TextureAtlasSprite>[] faceSprites,
+                                               int[] quadCount);
 
     TextureAtlasSprite getDefaultSprite();
 }

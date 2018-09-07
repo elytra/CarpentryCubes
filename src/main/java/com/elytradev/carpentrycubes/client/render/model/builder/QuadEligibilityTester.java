@@ -2,17 +2,14 @@ package com.elytradev.carpentrycubes.client.render.model.builder;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3i;
-import net.minecraftforge.client.model.pipeline.IVertexConsumer;
 
 import javax.vecmath.Vector3f;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class QuadEligibilityTester implements IVertexConsumer {
+public class QuadEligibilityTester {
 
     private Vector3f[] points = new Vector3f[4];
     private int currentPoint = 0;
@@ -22,22 +19,18 @@ public class QuadEligibilityTester implements IVertexConsumer {
         this.requiredOffset = quad.getFace().getDirectionVec();
     }
 
-    @Override
-    public VertexFormat getVertexFormat() {
-        return DefaultVertexFormats.ITEM;
-    }
-
-    @Override
-    public void put(int element, float... data) {
-        if (element == 0) {
-            // Some rounding to fix weird numbers caused by conversion back to floats.
-            for (int i = 0; i < data.length; i++) {
-                data[i] = Math.round(data[i] * (10000F)) / 10000F;
-            }
-
-            points[currentPoint] = new Vector3f(data[0], data[1], data[2]);
-            currentPoint++;
+    public void put(float... data) {
+        if (currentPoint == 4) {
+            return;
         }
+
+        // Some rounding to fix weird numbers caused by conversion back to floats.
+        for (int i = 0; i < data.length; i++) {
+            data[i] = Math.round(data[i] * (10000F)) / 10000F;
+        }
+
+        points[currentPoint] = new Vector3f(data[0], data[1], data[2]);
+        currentPoint++;
     }
 
     /**
@@ -103,25 +96,5 @@ public class QuadEligibilityTester implements IVertexConsumer {
             passed = false;
 
         return passed;
-    }
-
-    @Override
-    public void setQuadTint(int tint) {
-        // NO-OP
-    }
-
-    @Override
-    public void setQuadOrientation(EnumFacing orientation) {
-        // NO-OP
-    }
-
-    @Override
-    public void setApplyDiffuseLighting(boolean diffuse) {
-        // NO-OP
-    }
-
-    @Override
-    public void setTexture(TextureAtlasSprite texture) {
-        // NO-OP
     }
 }

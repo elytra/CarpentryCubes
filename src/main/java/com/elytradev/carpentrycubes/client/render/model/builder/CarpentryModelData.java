@@ -1,6 +1,7 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
 import com.elytradev.carpentrycubes.client.render.QuadBuilder;
+import com.elytradev.carpentrycubes.common.CarpentryLog;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
@@ -10,7 +11,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
 
-import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,22 +29,18 @@ public class CarpentryModelData {
     private TRSRTransformation transform = TRSRTransformation.identity();
     private ArrayList<Integer>[] tintIndices = new ArrayList[EnumFacing.values().length];
     private ArrayList<TextureAtlasSprite>[] faceSprites = new ArrayList[EnumFacing.values().length];
-    private ArrayList<Vector3f>[] quadOffsets = new ArrayList[EnumFacing.values().length];
 
     public CarpentryModelData(ICarpentryModel<?> carpentryModel) {
         this.carpentryModel = carpentryModel;
         for (int i = 0; i < tintIndices.length; i++) {
             tintIndices[i] = Lists.newArrayList();
             faceSprites[i] = Lists.newArrayList();
-            quadOffsets[i] = Lists.newArrayList();
         }
     }
 
-    public void setFaceData(int quadNumber, EnumFacing side, TextureAtlasSprite sprite, int tintIndex,
-                            Vector3f offset) {
+    public void setFaceData(int quadNumber, EnumFacing side, TextureAtlasSprite sprite, int tintIndex) {
         addOrSet(this.faceSprites[side.getIndex()], quadNumber, sprite);
         addOrSet(this.tintIndices[side.getIndex()], quadNumber, tintIndex);
-        addOrSet(this.quadOffsets[side.getIndex()], quadNumber, offset);
     }
 
     private void addOrSet(ArrayList list, int index, Object element) {
@@ -84,11 +80,8 @@ public class CarpentryModelData {
 
                     QuadBuilder quadBuilder = new QuadBuilder(transform, sprite, newFace, tintIndex);
                     for (CarpentryVertex vertex : quad.getVertices()) {
-                        float[] UVs = vertex.getUVs();
-                        UVs = carpentryModel.getUVs(oldFace, facing, transform, state, UVs[0], UVs[1]);
-                        float u, v;
-                        u = sprite.getInterpolatedU(UVs[0]);
-                        v = sprite.getInterpolatedV(UVs[1]);
+                        float[] UVs = vertex.getUVs(transform);
+                        float u = sprite.getInterpolatedU(UVs[0]), v = sprite.getInterpolatedV(UVs[1]);
                         quadBuilder.putVertex(vertex.getX(), vertex.getY(), vertex.getZ(), u, v,
                                 vertex.getNormalX(), vertex.getNormalY(), vertex.getNormalZ());
                     }
@@ -98,7 +91,6 @@ public class CarpentryModelData {
                 }
             }
         }
-
         setup();
         return new ModelDataQuads(generalQuads, faceQuads);
     }
@@ -110,17 +102,15 @@ public class CarpentryModelData {
         this.transform = TRSRTransformation.identity();
         this.tintIndices = new ArrayList[EnumFacing.values().length];
         this.faceSprites = new ArrayList[EnumFacing.values().length];
-        this.quadOffsets = new ArrayList[EnumFacing.values().length];
 
         for (int i = 0; i < tintIndices.length; i++) {
             tintIndices[i] = Lists.newArrayList();
             faceSprites[i] = Lists.newArrayList();
-            quadOffsets[i] = Lists.newArrayList();
         }
     }
 
-    public void addInstruction(EnumFacing facing, float x, float y, float z, float u, float v) {
-        float[] data = new float[]{x, y, z, u, v};
+    public void addInstruction(EnumFacing facing, float x, float y, float z) {
+        float[] data = new float[]{x, y, z};
 
         if (!this.quads.containsKey(facing))
             this.quads.put(facing, new ArrayList<>());
@@ -132,6 +122,11 @@ public class CarpentryModelData {
         CarpentryQuad selectedQuad = faceQuads.get(faceQuads.size() - 1);
         selectedQuad.setVertex(selectedQuad.getNextVertex(), data);
     }
+
+    private class ModelCache {
+
+    }
+
 
     public class ModelDataQuads {
         private final List<BakedQuad> generalQuads;

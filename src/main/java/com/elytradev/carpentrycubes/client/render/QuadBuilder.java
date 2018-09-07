@@ -9,6 +9,7 @@ import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.common.model.TRSRTransformation;
 
 import javax.annotation.Nullable;
+import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ public class QuadBuilder {
 
     public void putVertex(float x, float y, float z, float u, float v, float normalX, float normalY, float normalZ) {
         Vector4f vec = new Vector4f();
+        Vector3f normals = new Vector3f(normalX, normalY, normalZ);
         for (int e = 0; e < format.getElementCount(); e++) {
             switch (format.getElement(e).getUsage()) {
                 case POSITION:
@@ -59,7 +61,6 @@ public class QuadBuilder {
                         break;
                     }
                 case NORMAL:
-                    Vector4f normals = new Vector4f(normalX, normalY, normalZ, 0F);
                     if (transform.isPresent()) {
                         transform.get().getMatrix().transform(normals);
                         builder.put(e, normals.x, normals.y, normals.z, 0F);
