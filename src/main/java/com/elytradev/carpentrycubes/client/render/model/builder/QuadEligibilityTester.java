@@ -1,5 +1,6 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
@@ -7,6 +8,7 @@ import net.minecraft.util.math.Vec3i;
 
 import javax.vecmath.Vector3f;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class QuadEligibilityTester {
@@ -61,7 +63,15 @@ public class QuadEligibilityTester {
      * @return true if every point is distinct, false otherwise.
      */
     private boolean checkForMatchingPoints() {
-        return Arrays.stream(points).distinct().collect(Collectors.toList()).size() == points.length;
+        List<Integer> uniquePoints = Lists.newArrayList();
+        for (Vector3f point : this.points) {
+            int hashCode = point.hashCode();
+            if(!uniquePoints.contains(hashCode)){
+                uniquePoints.add(hashCode);
+            }
+        }
+
+        return uniquePoints.size() == this.points.length;
     }
 
     /**
