@@ -15,7 +15,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import javax.annotation.Nullable;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class CarpentryBakedModel implements IBakedModel {
 
     class CachedQuadData {
-
+        EnumFacing face;
     }
 
     @Override
@@ -116,10 +115,7 @@ public class CarpentryBakedModel implements IBakedModel {
             QuadEligibilityTester tester = new QuadEligibilityTester(bakedQuad);
             this.putQuadInTester(tester, bakedQuad);
             if (tester.isValid()) {
-                System.out.println("Passed quad test!");
                 eligibleQuads.add(bakedQuad);
-            } else {
-                System.out.println("Failed quad test...");
             }
         }
         return eligibleQuads;
@@ -128,13 +124,38 @@ public class CarpentryBakedModel implements IBakedModel {
     private void putQuadInTester(QuadEligibilityTester tester, BakedQuad quad) {
         float[] data = new float[4];
         VertexFormat format = quad.getFormat();
-        int countTo = format.getElementCount();
+
         for (int v = 0; v < 4; v++) {
-            for (int e = 0; e < countTo; e++) {
-                if (Objects.equals(format.getElement(e).getUsage(), VertexFormatElement.EnumUsage.POSITION)) {
-                    LightUtil.unpack(quad.getVertexData(), data, quad.getFormat(), v, e);
+            for (VertexFormatElement element : format.getElements()) {
+                if (Objects.equals(element.getUsage(), VertexFormatElement.EnumUsage.POSITION)
+                        && Objects.equals(element.getType(), VertexFormatElement.EnumType.FLOAT)) {
+                    unpackVertexData(quad.getVertexData(), data, element, quad.getFormat(), v, element.getIndex());
                     tester.put(data);
                 }
+            }
+        }
+    }
+
+    private void unpackVertexData(int[] from, float[] to, VertexFormatElement element, VertexFormat formatFrom, int v, int e) {
+        int length = 4 < to.length ? 4 : to.length;
+        int vertexStart = v * formatFrom.getSize() + formatFrom.getOffset(e);
+        int count = element.getElementCount();
+        int size = element.getType().getSize();
+        int mask = (256 << (8 * (size - 1))) - 1;
+        for (int i = 0; i < length; i++) {
+            if (i < count) {
+                int pos = vertexStart + size * i;
+                int index = pos >> 2;
+                int offset = pos & 3;
+                int bits = from[index];
+                bits = bits >>> (offset * 8);
+                if ((pos + size - 1) / 4 != index) {
+                    bits |= from[index + 1] << ((4 - offset) * 8);
+                }
+                bits &= mask;
+                to[i] = Float.intBitsToFloat(bits);
+            } else {
+                to[i] = 0;
             }
         }
     }

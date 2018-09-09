@@ -22,14 +22,11 @@ public class QuadBuilder {
     private VertexFormat format;
     private Optional<TRSRTransformation> transform;
 
-    public QuadBuilder(@Nullable TRSRTransformation transform, TextureAtlasSprite sprite,
-                       EnumFacing side, int tintIndex) {
+    public QuadBuilder(@Nullable TRSRTransformation transform, EnumFacing side) {
         this.format = DefaultVertexFormats.ITEM;
         this.builder = new UnpackedBakedQuad.Builder(format);
         this.transform = Optional.of(transform);
 
-        this.builder.setTexture(sprite);
-        this.builder.setQuadTint(tintIndex);
         this.builder.setQuadOrientation(side);
         this.builder.setApplyDiffuseLighting(true);
         this.builder.setContractUVs(true);
@@ -75,8 +72,10 @@ public class QuadBuilder {
         }
     }
 
-    public BakedQuad build() {
-        return builder.build();
+    public BakedQuad build(TextureAtlasSprite sprite, int tintIndex) {
+        this.builder.setTexture(sprite);
+        this.builder.setQuadTint(tintIndex);
+        return this.builder.build();
     }
 
 }

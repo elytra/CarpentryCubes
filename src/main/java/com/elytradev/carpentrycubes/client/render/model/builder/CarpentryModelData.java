@@ -1,7 +1,5 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
-import com.elytradev.carpentrycubes.client.render.QuadBuilder;
-import com.elytradev.carpentrycubes.common.CarpentryLog;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
@@ -75,17 +73,9 @@ public class CarpentryModelData {
 
                 int spritesForFace = this.faceSprites[newFace.getIndex()].size();
                 for (int spriteIndex = 0; spriteIndex < spritesForFace; spriteIndex++) {
-                    TextureAtlasSprite sprite = this.faceSprites[newFace.getIndex()].get(spriteIndex);
-                    int tintIndex = this.tintIndices[newFace.getIndex()].get(spriteIndex);
-
-                    QuadBuilder quadBuilder = new QuadBuilder(transform, sprite, newFace, tintIndex);
-                    for (CarpentryVertex vertex : quad.getVertices()) {
-                        float[] UVs = vertex.getUVs(transform);
-                        float u = sprite.getInterpolatedU(UVs[0]), v = sprite.getInterpolatedV(UVs[1]);
-                        quadBuilder.putVertex(vertex.getX(), vertex.getY(), vertex.getZ(), u, v,
-                                vertex.getNormalX(), vertex.getNormalY(), vertex.getNormalZ());
-                    }
-                    BakedQuad builtQuad = quadBuilder.build();
+                    BakedQuad builtQuad = quad.bake(transform, newFace,
+                            this.faceSprites[newFace.getIndex()].get(spriteIndex),
+                            this.tintIndices[newFace.getIndex()].get(spriteIndex));
                     generalQuads.add(builtQuad);
                     faceQuads.get(newFace).add(builtQuad);
                 }
