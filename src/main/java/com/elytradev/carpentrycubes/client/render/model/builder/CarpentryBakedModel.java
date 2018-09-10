@@ -1,6 +1,7 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -36,9 +37,10 @@ public class CarpentryBakedModel implements IBakedModel {
             BlockCarpentry block = (BlockCarpentry) state.getBlock();
             ICarpentryModel<? extends BlockCarpentry> carpentryModel = block.getModel();
             IExtendedBlockState extendedState = (IExtendedBlockState) state;
-            IBlockState coverState = extendedState.getValue(BlockCarpentry.COVERSTATE);
-            IBlockAccess access = extendedState.getValue(BlockCarpentry.BLOCK_ACCESS);
-            BlockPos pos = extendedState.getValue(BlockCarpentry.POS);
+            TileCarpentry tile = extendedState.getValue(BlockCarpentry.CARPENTRY_TILE);
+            IBlockState coverState = tile.getCoverState();
+            IBlockAccess access = tile.getWorld();
+            BlockPos pos = tile.getPos();
             if (!Objects.equals(block.getRenderLayer(access, pos), MinecraftForgeClient.getRenderLayer()))
                 return quads;
 

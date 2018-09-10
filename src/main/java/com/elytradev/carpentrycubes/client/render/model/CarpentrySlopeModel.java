@@ -6,6 +6,7 @@ import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumOrientation;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumShape;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
