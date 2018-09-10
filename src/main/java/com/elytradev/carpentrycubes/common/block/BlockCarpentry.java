@@ -72,9 +72,10 @@ public class BlockCarpentry extends BlockContainer {
             if (!worldIn.isRemote && Block.getBlockFromItem(heldItem.getItem()) != Blocks.AIR
                     && !playerIn.isSneaking()) {
                 Block block = Block.getBlockFromItem(heldItem.getItem());
-                if (block instanceof BlockCarpentry)
+                IBlockState coverState = block.getStateFromMeta(heldItem.getMetadata());
+                if (block instanceof BlockCarpentry || !coverState.isFullBlock())
                     return false;
-                tileCarpentry.setCoverState(block.getStateFromMeta(heldItem.getMetadata()));
+                tileCarpentry.setCoverState(coverState);
                 new TileUpdateMessage(tileCarpentry).sendToAllWatching(tileCarpentry);
                 return true;
             }

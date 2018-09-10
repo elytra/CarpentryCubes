@@ -99,7 +99,7 @@ public class CarpentryModelData {
         }
     }
 
-    public void addInstruction(EnumFacing facing, float x, float y, float z) {
+    public void addQuadInstruction(EnumFacing facing, float x, float y, float z) {
         float[] data = new float[]{x, y, z};
 
         if (!this.quads.containsKey(facing))
@@ -113,10 +113,23 @@ public class CarpentryModelData {
         selectedQuad.setVertex(selectedQuad.getNextVertex(), data);
     }
 
-    private class ModelCache {
+    public void addTriInstruction(EnumFacing facing, float x, float y, float z) {
+        float[] data = new float[]{x, y, z};
 
+        if (!this.quads.containsKey(facing))
+            this.quads.put(facing, new ArrayList<>());
+
+        List<CarpentryQuad> faceQuads = this.quads.get(facing);
+        if (faceQuads.isEmpty() || faceQuads.get(faceQuads.size() - 1).isComplete())
+            faceQuads.add(new CarpentryQuad(facing));
+
+        CarpentryQuad selectedQuad = faceQuads.get(faceQuads.size() - 1);
+
+        // If this is the first vertex being added to the quad then add it twice so the tri creates a full quad.
+        if (selectedQuad.getNextVertex() == 0)
+            selectedQuad.setVertex(selectedQuad.getNextVertex(), data);
+        selectedQuad.setVertex(selectedQuad.getNextVertex(), data);
     }
-
 
     public class ModelDataQuads {
         private final List<BakedQuad> generalQuads;
