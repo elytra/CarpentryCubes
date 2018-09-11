@@ -12,23 +12,28 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.particle.ParticleDigging;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 public class BlockCarpentry extends BlockContainer {
 
@@ -44,6 +49,148 @@ public class BlockCarpentry extends BlockContainer {
 
     protected IUnlistedProperty[] getUnlistedProperties() {
         return new IUnlistedProperty[0];
+    }
+
+    @Override
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
+        if (world != null) {
+            TileEntity tileEntity = world.getTileEntity(pos);
+            TileCarpentry tile = tileEntity instanceof TileCarpentry ? (TileCarpentry) tileEntity : null;
+            if (tile != null && tile.hasCoverState()) {
+                return tile.getCoverState().getLightValue();
+            }
+        }
+
+        return super.getLightValue(state, world, pos);
+    }
+
+    @Override
+    public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+        if (world != null) {
+            TileEntity tileEntity = world.getTileEntity(pos);
+            TileCarpentry tile = tileEntity instanceof TileCarpentry ? (TileCarpentry) tileEntity : null;
+            if (tile != null && tile.hasCoverState()) {
+                return tile.getCoverState().getLightOpacity();
+            }
+        }
+
+        return super.getLightOpacity(state, world, pos);
+    }
+
+    @Override
+    public boolean addLandingEffects(IBlockState state, WorldServer world, BlockPos pos, IBlockState state2, EntityLivingBase entity, int numberOfParticles) {
+        if (world != null) {
+            TileEntity tileEntity = world.getTileEntity(pos);
+            TileCarpentry tile = tileEntity instanceof TileCarpentry ? (TileCarpentry) tileEntity : null;
+            if (tile != null && tile.hasCoverState()) {
+                world.spawnParticle(EnumParticleTypes.BLOCK_DUST, entity.posX, entity.posY, entity.posZ,
+                        numberOfParticles, 0.0D, 0.0D, 0.0D, 0.15000000596046448D,
+                        Block.getStateId(tile.getCoverState()));
+                return true;
+            }
+        }
+        return super.addLandingEffects(state, world, pos, state2, entity, numberOfParticles);
+    }
+
+    @Override
+    public boolean addRunningEffects(IBlockState state, World world, BlockPos pos, Entity entity) {
+        if (world != null) {
+            TileEntity tileEntity = world.getTileEntity(pos);
+            TileCarpentry tile = tileEntity instanceof TileCarpentry ? (TileCarpentry) tileEntity : null;
+            if (tile != null && tile.hasCoverState()) {
+                IBlockState coverState = tile.getCoverState();
+                Random rand = new Random();
+                double x = entity.posX, z = entity.posZ, motionX = entity.motionX, motionZ = entity.motionZ;
+                AxisAlignedBB bb = entity.getEntityBoundingBox();
+                world.spawnParticle(EnumParticleTypes.BLOCK_CRACK,
+                        x + ((double) rand.nextFloat() - 0.5D) * (double) entity.width, bb.minY + 0.1D,
+                        z + ((double) rand.nextFloat() - 0.5D) * (double) entity.width, -motionX * 4.0D,
+                        1.5D, -motionZ * 4.0D, Block.getStateId(coverState));
+
+                return true;
+            }
+        }
+        return super.addRunningEffects(state, world, pos, entity);
+    }
+
+    @Override
+    public boolean addHitEffects(IBlockState state, World world, RayTraceResult target, ParticleManager manager) {
+        if (world != null) {
+            TileEntity tileEntity = world.getTileEntity(target.getBlockPos());
+            TileCarpentry tile = tileEntity instanceof TileCarpentry ? (TileCarpentry) tileEntity : null;
+            if (tile != null && tile.hasCoverState()) {
+                IBlockState coverState = tile.getCoverState();
+                int particleId = EnumParticleTypes.BLOCK_CRACK.getParticleID();
+
+                EnumFacing side = target.sideHit;
+                BlockPos pos = target.getBlockPos();
+                Random rand = new Random();
+                AxisAlignedBB axisalignedbb = state.getBoundingBox(world, pos);
+                double x = (double) pos.getX() + rand.nextDouble() * (axisalignedbb.maxX - axisalignedbb.minX - 0.20000000298023224D) + 0.10000000149011612D + axisalignedbb.minX;
+                double y = (double) pos.getY() + rand.nextDouble() * (axisalignedbb.maxY - axisalignedbb.minY - 0.20000000298023224D) + 0.10000000149011612D + axisalignedbb.minY;
+                double z = (double) pos.getZ() + rand.nextDouble() * (axisalignedbb.maxZ - axisalignedbb.minZ - 0.20000000298023224D) + 0.10000000149011612D + axisalignedbb.minZ;
+
+                if (side == EnumFacing.DOWN) {
+                    y = (double) pos.getY() + axisalignedbb.minY - 0.10000000149011612D;
+                }
+
+                if (side == EnumFacing.UP) {
+                    y = (double) pos.getY() + axisalignedbb.maxY + 0.10000000149011612D;
+                }
+
+                if (side == EnumFacing.NORTH) {
+                    z = (double) pos.getZ() + axisalignedbb.minZ - 0.10000000149011612D;
+                }
+
+                if (side == EnumFacing.SOUTH) {
+                    z = (double) pos.getZ() + axisalignedbb.maxZ + 0.10000000149011612D;
+                }
+
+                if (side == EnumFacing.WEST) {
+                    x = (double) pos.getX() + axisalignedbb.minX - 0.10000000149011612D;
+                }
+
+                if (side == EnumFacing.EAST) {
+                    x = (double) pos.getX() + axisalignedbb.maxX + 0.10000000149011612D;
+                }
+
+                manager.spawnEffectParticle(particleId, x, y, z, 0, 0, 0, Block.getStateId(coverState))
+                        .multiplyVelocity(0.2F)
+                        .multipleParticleScaleBy(0.6F);
+                return true;
+            }
+        }
+        return super.addHitEffects(state, world, target, manager);
+    }
+
+    @Override
+    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager) {
+        if (world != null) {
+            TileEntity tileEntity = world.getTileEntity(pos);
+            TileCarpentry tile = tileEntity instanceof TileCarpentry ? (TileCarpentry) tileEntity : null;
+            if (tile != null && tile.hasCoverState()) {
+                IBlockState coverState = tile.getCoverState();
+                int particleId = EnumParticleTypes.BLOCK_CRACK.getParticleID();
+                for (int j = 0; j < 4; ++j) {
+                    for (int k = 0; k < 4; ++k) {
+                        for (int l = 0; l < 4; ++l) {
+                            double d0 = ((double) j + 0.5D) / 4.0D;
+                            double d1 = ((double) k + 0.5D) / 4.0D;
+                            double d2 = ((double) l + 0.5D) / 4.0D;
+                            ParticleDigging particle = (ParticleDigging) manager.spawnEffectParticle(particleId,
+                                    (double) pos.getX() + d0,
+                                    (double) pos.getY() + d1,
+                                    (double) pos.getZ() + d2,
+                                    d0 - 0.5D, d1 - 0.5D, d2 - 0.5D,
+                                    Block.getStateId(coverState));
+                            particle.setBlockPos(pos);
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+        return super.addDestroyEffects(world, pos, manager);
     }
 
     @Override
@@ -116,7 +263,13 @@ public class BlockCarpentry extends BlockContainer {
 
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
-        return true;
+        if (state instanceof IExtendedBlockState) {
+            TileCarpentry tile = ((IExtendedBlockState) state).getValue(CARPENTRY_TILE);
+            if (tile != null && tile.hasCoverState()) {
+                return tile.getCoverState().getBlock().canRenderInLayer(tile.getCoverState(), layer);
+            }
+        }
+        return layer == BlockRenderLayer.CUTOUT;
     }
 
     @Override
@@ -130,14 +283,4 @@ public class BlockCarpentry extends BlockContainer {
         return super.isTranslucent(state);
     }
 
-    public BlockRenderLayer getRenderLayer(IBlockAccess access, BlockPos pos) {
-        if (access != null && pos != null) {
-            TileEntity tileEntity = access.getTileEntity(pos);
-            if (tileEntity instanceof TileCarpentry && ((TileCarpentry) tileEntity).hasCoverState()) {
-                return ((TileCarpentry) tileEntity).getCoverState().getBlock().getRenderLayer();
-            }
-        }
-
-        return BlockRenderLayer.CUTOUT;
-    }
 }

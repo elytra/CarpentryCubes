@@ -41,9 +41,6 @@ public class CarpentryBakedModel implements IBakedModel {
             IBlockState coverState = tile.getCoverState();
             IBlockAccess access = tile.getWorld();
             BlockPos pos = tile.getPos();
-            if (!Objects.equals(block.getRenderLayer(access, pos), MinecraftForgeClient.getRenderLayer()))
-                return quads;
-
             ArrayList<Integer>[] tintIndices = new ArrayList[EnumFacing.values().length];
             ArrayList<TextureAtlasSprite>[] faceSprites = new ArrayList[EnumFacing.values().length];
             int[] quadCount = new int[EnumFacing.values().length];
@@ -179,7 +176,7 @@ public class CarpentryBakedModel implements IBakedModel {
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("missingno");
+        return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("carpentrycubes:blocks/foursectionframe");
     }
 
     @Override
