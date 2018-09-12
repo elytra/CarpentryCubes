@@ -1,32 +1,56 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
 
 public class CarpentryModelLoader implements ICustomModelLoader {
 
-    private IModel model = (state, format, bakedTextureGetter) -> new CarpentryBakedModel();
+    private List<ModelWithPredicate> models = Lists.newArrayList();
 
-    @Override
-    public boolean accepts(ResourceLocation modelLocation) {
-        // TODO: Additional checks for the resource path.
-        return modelLocation.getNamespace().equals(MOD_ID) && !modelLocation.getPath().contains("tool");
+    private class ModelWithPredicate {
+        private Predicate<ResourceLocation> predicate;
+        private IModel model;
+
+        public ModelWithPredicate(Predicate<ResourceLocation> predicate, IModel model) {
+            this.predicate = predicate;
+            this.model = model;
+        }
+
+        public boolean providesFor(ResourceLocation resourceLocation) {
+            return predicate.test(resourceLocation);
+        }
+
+        public IModel getModel() {
+            return model;
+        }
+    }
+
+    public void registerModel(Predicate<ResourceLocation> predicate, IModel model) {
+        this.models.add(new ModelWithPredicate(predicate, model));
     }
 
     @Override
-    public IModel loadModel(ResourceLocation modelLocation) throws Exception {
-        if (model == null)
-            model = (state, format, bakedTextureGetter) -> new CarpentryBakedModel();
+    public boolean accepts(ResourceLocation modelLocation) {
+        return modelLocation.getNamespace().equals(MOD_ID) && models.stream().anyMatch(m -> m.providesFor(modelLocation));
+    }
 
-        return model;
+    @Override
+    public IModel loadModel(ResourceLocation modelLocation) {
+        Optional<ModelWithPredicate> model = models.stream().filter(m -> m.providesFor(modelLocation)).findFirst();
+        return model.map(ModelWithPredicate::getModel).orElse(null);
     }
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
-        model = (state, format, bakedTextureGetter) -> new CarpentryBakedModel();
+        // NO-OP
     }
 }

@@ -1,4 +1,5 @@
-tile.carpentrycubes.carpentrySlope=Capentry Slope
+tile.carpentrycubes.carpentrySlope.name=Capentry Slope
+tile.carpentrycubes.carpentryCube.name=Capentry Cube
 
 item.carpentrycubes.hammer.name=Carpentry Hammer
 

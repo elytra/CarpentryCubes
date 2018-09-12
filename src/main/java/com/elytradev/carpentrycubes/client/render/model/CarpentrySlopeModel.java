@@ -6,10 +6,10 @@ import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumOrientation;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumShape;
-import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -19,6 +19,7 @@ import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope> {
 
@@ -230,5 +231,21 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
     @Override
     public TextureAtlasSprite getDefaultSprite() {
         return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("carpentrycubes:blocks/foursectionframe");
+    }
+
+    @Override
+    public List<BakedQuad> getDefaultModel() {
+        CarpentryModelData modelData = CarpentrySlopeModel.straightSlopeModelData;
+        modelData.setState(null);
+        modelData.setTransform(EnumFacing.UP, TRSRTransformation.identity());
+        for (int i = 0; i < EnumFacing.values().length; i++) {
+            EnumFacing side = EnumFacing.values()[i];
+            TextureAtlasSprite sprite = getDefaultSprite();
+            int tintIndex = -1;
+
+            modelData.setFaceData(0, side, sprite, tintIndex);
+        }
+
+        return modelData.buildModel().getGeneralQuads();
     }
 }

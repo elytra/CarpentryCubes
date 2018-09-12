@@ -6,17 +6,15 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import org.lwjgl.util.vector.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -26,13 +24,49 @@ import java.util.stream.Collectors;
 
 public class CarpentryBakedModel implements IBakedModel {
 
-    class CachedQuadData {
-        EnumFacing face;
+    private final ICarpentryModel defaultModel;
+    private final ItemCameraTransforms transforms;
+
+    public CarpentryBakedModel(ICarpentryModel defaultModel) {
+        ItemTransformVec3f gui = new ItemTransformVec3f(new Vector3f(30F, 90+45F, 0F),
+                new Vector3f(0F, 0F, 0F),
+                new Vector3f(0.625F, 0.625F, 0.625F));
+
+        ItemTransformVec3f ground = new ItemTransformVec3f(new Vector3f(0F, 0F, 0F),
+                new Vector3f(0F, 0.1875F, 0F),
+                new Vector3f(0.25F, 0.25F, 0.25F));
+
+        ItemTransformVec3f fixed = new ItemTransformVec3f(new Vector3f(0F, 0F, 0F),
+                new Vector3f(0F, 0F, 0F),
+                new Vector3f(0.5F, 0.5F, 0.5F));
+
+        ItemTransformVec3f thirdpersonLeft = new ItemTransformVec3f(new Vector3f(75F, 45F, 0F),
+                new Vector3f(0F, 0.15625F, 0F),
+                new Vector3f(0.375F, 0.375F, 0.375F));
+
+        ItemTransformVec3f thirdpersonRight = new ItemTransformVec3f(new Vector3f(75F, 45F, 0F),
+                new Vector3f(0F, 0.15625F, 0F),
+                new Vector3f(0.375F, 0.375F, 0.375F));
+
+        ItemTransformVec3f firstpersonLeft = new ItemTransformVec3f(new Vector3f(0F, 225F, 0F),
+                new Vector3f(0F, 0F, 0F),
+                new Vector3f(0.4F, 0.4F, 0.4F));
+
+        ItemTransformVec3f firstpersonRight = new ItemTransformVec3f(new Vector3f(0F, 45F, 0F),
+                new Vector3f(0F, 0F, 0F),
+                new Vector3f(0.4F, 0.4F, 0.4F));
+
+        this.defaultModel = defaultModel;
+        this.transforms = new ItemCameraTransforms(thirdpersonLeft, thirdpersonRight, firstpersonLeft, firstpersonRight, ItemTransformVec3f.DEFAULT, gui, ground, fixed);
+    }
+
+    public CarpentryBakedModel(ICarpentryModel defaultModel, ItemCameraTransforms transforms) {
+        this.defaultModel = defaultModel;
+        this.transforms = transforms;
     }
 
     @Override
     public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-        List<BakedQuad> quads = Lists.newArrayList();
         if (state != null && state.getBlock() instanceof BlockCarpentry) {
             BlockCarpentry block = (BlockCarpentry) state.getBlock();
             ICarpentryModel<? extends BlockCarpentry> carpentryModel = block.getModel();
@@ -56,9 +90,9 @@ public class CarpentryBakedModel implements IBakedModel {
             // Build the model and return the quads for the side.
             CarpentryModelData.ModelDataQuads modelDataQuads = carpentryModel.getQuads(state, access, pos, tintIndices, faceSprites, quadCount);
             return side == null ? modelDataQuads.getGeneralQuads() : modelDataQuads.getFaceQuads().get(side);
+        } else {
+            return this.defaultModel.getDefaultModel();
         }
-
-        return quads;
     }
 
     private void gatherQuadData(long rand, ICarpentryModel<? extends BlockCarpentry> carpentryModel,
@@ -182,5 +216,10 @@ public class CarpentryBakedModel implements IBakedModel {
     @Override
     public ItemOverrideList getOverrides() {
         return ItemOverrideList.NONE;
+    }
+
+    @Override
+    public ItemCameraTransforms getItemCameraTransforms() {
+        return transforms;
     }
 }

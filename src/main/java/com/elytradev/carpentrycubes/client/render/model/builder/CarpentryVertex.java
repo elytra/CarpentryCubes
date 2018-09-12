@@ -43,7 +43,7 @@ public class CarpentryVertex {
                 break;
             case UP:
                 u = pos.getX() * 16F;
-                v = -16F * (pos.getZ() - 1F);
+                v = pos.getZ() * 16F;
                 break;
             case NORTH:
                 u = -16F * (pos.getX() - 1F);

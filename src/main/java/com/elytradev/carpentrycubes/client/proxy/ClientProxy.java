@@ -1,5 +1,8 @@
 package com.elytradev.carpentrycubes.client.proxy;
 
+import com.elytradev.carpentrycubes.client.render.model.CarpentryCubeModel;
+import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryBakedModel;
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
@@ -8,7 +11,6 @@ import com.elytradev.carpentrycubes.common.proxy.CommonProxy;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.concrete.resgen.ConcreteResourcePack;
 import com.elytradev.concrete.resgen.IResourceHolder;
-import java.util.Collection;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
@@ -23,6 +25,8 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+import java.util.Collection;
 
 public class ClientProxy extends CommonProxy {
 
@@ -69,7 +73,7 @@ public class ClientProxy extends CommonProxy {
         ItemModelMesher modelMesher = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
         for (int i = 0; i < CarpentryContent.registeredBlocks.size(); i++) {
             modelResourceLocation = new ModelResourceLocation(
-                CarpentryMod.RESOURCE_DOMAIN + CarpentryContent.registeredBlocks.keySet().toArray()[i], "inventory");
+                    CarpentryMod.RESOURCE_DOMAIN + CarpentryContent.registeredBlocks.keySet().toArray()[i], "inventory");
             itemToRegister = Item.getItemFromBlock((Block) CarpentryContent.registeredBlocks.values().toArray()[i]);
 
             modelMesher.register(itemToRegister, 0, modelResourceLocation);
@@ -77,7 +81,7 @@ public class ClientProxy extends CommonProxy {
 
         for (int i = 0; i < CarpentryContent.registeredItems.size(); i++) {
             modelResourceLocation = new ModelResourceLocation(
-                CarpentryMod.RESOURCE_DOMAIN + CarpentryContent.registeredItems.keySet().toArray()[i], "inventory");
+                    CarpentryMod.RESOURCE_DOMAIN + CarpentryContent.registeredItems.keySet().toArray()[i], "inventory");
             itemToRegister = (Item) CarpentryContent.registeredItems.values().toArray()[i];
             if (CarpentryContent.skipItemMesh.contains(itemToRegister) || itemToRegister instanceof IResourceHolder)
                 continue;
@@ -96,7 +100,14 @@ public class ClientProxy extends CommonProxy {
 
     @SubscribeEvent
     public void onModelRegistryEvent(ModelRegistryEvent event) {
-        ModelLoaderRegistry.registerLoader(new CarpentryModelLoader());
+        CarpentryModelLoader carpentryModelLoader = new CarpentryModelLoader();
+
+        carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentryslope")),
+                (state, format, textureGetter) -> new CarpentryBakedModel(CarpentrySlopeModel.getInstance()));
+        carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrycube")),
+                (state, format, textureGetter) -> new CarpentryBakedModel(CarpentryCubeModel.getInstance()));
+
+        ModelLoaderRegistry.registerLoader(carpentryModelLoader);
     }
 
 }

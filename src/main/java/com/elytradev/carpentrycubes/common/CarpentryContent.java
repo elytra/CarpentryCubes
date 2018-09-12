@@ -2,6 +2,8 @@ package com.elytradev.carpentrycubes.common;
 
 import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
 
+import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
+import com.elytradev.carpentrycubes.common.block.BlockCarpentryCube;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
@@ -36,6 +38,7 @@ public class CarpentryContent {
     public static List<Object> skipItemMesh;
     public static String REGISTRY_PREFIX = MOD_ID.toLowerCase();
     public static BlockCarpentrySlope blockSlope;
+    public static BlockCarpentry blockCube;
     public static ItemCarpentryHammer itemHammer;
     private static List<Item> itemBlocksToRegister;
     public int recipeID = 0;
@@ -72,6 +75,9 @@ public class CarpentryContent {
         IForgeRegistry<Block> registry = event.getRegistry();
         registeredBlocks = new HashMap<>();
         itemBlocksToRegister = new ArrayList<>();
+
+        blockCube = new BlockCarpentryCube(Material.WOOD);
+        registerBlock(registry, "carpentryCube", blockCube, true);
 
         blockSlope = new BlockCarpentrySlope(Material.WOOD);
         registerBlock(registry, "carpentrySlope", blockSlope, true);
