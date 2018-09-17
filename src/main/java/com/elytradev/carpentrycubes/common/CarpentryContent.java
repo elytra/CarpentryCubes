@@ -1,16 +1,13 @@
 package com.elytradev.carpentrycubes.common;
 
-import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
-
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentryCube;
+import com.elytradev.carpentrycubes.common.block.BlockCarpentryMorphable;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentryMorphable;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -31,15 +28,25 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import net.minecraftforge.registries.IForgeRegistry;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static com.elytradev.carpentrycubes.common.CarpentryMod.MOD_ID;
+
 public class CarpentryContent {
 
     public static HashMap<String, Block> registeredBlocks;
     public static HashMap<String, Item> registeredItems;
     public static List<Object> skipItemMesh;
     public static String REGISTRY_PREFIX = MOD_ID.toLowerCase();
-    public static BlockCarpentrySlope blockSlope;
+
     public static BlockCarpentry blockCube;
+    public static BlockCarpentrySlope blockSlope;
+    public static BlockCarpentryMorphable blockMorphable;
+
     public static ItemCarpentryHammer itemHammer;
+
     private static List<Item> itemBlocksToRegister;
     public int recipeID = 0;
     private CreativeTabs creativeTab = new CreativeTabs(CarpentryMod.MOD_ID) {
@@ -60,6 +67,7 @@ public class CarpentryContent {
         // register tiles
         GameRegistry.registerTileEntity(TileCarpentry.class, REGISTRY_PREFIX + ":" + "tileCarpentry");
         GameRegistry.registerTileEntity(TileCarpentrySlope.class, REGISTRY_PREFIX + ":" + "tileCarpentrySlope");
+        GameRegistry.registerTileEntity(TileCarpentryMorphable.class, REGISTRY_PREFIX + ":" + "tileCarpentryMorphable");
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -81,6 +89,9 @@ public class CarpentryContent {
 
         blockSlope = new BlockCarpentrySlope(Material.WOOD);
         registerBlock(registry, "carpentrySlope", blockSlope, true);
+
+        blockMorphable = new BlockCarpentryMorphable(Material.WOOD);
+        registerBlock(registry, "carpentryMorphable", blockMorphable, true);
     }
 
     @SubscribeEvent
@@ -119,7 +130,7 @@ public class CarpentryContent {
     }
 
     private void registerBlock(IForgeRegistry<Block> registry, String id, Block block,
-        Class<? extends ItemBlock> itemBlockClass) {
+                               Class<? extends ItemBlock> itemBlockClass) {
         try {
             block.setTranslationKey("carpentrycubes." + id);
             block.setRegistryName(REGISTRY_PREFIX, id);

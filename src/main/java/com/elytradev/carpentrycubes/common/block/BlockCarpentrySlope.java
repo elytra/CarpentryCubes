@@ -1,7 +1,7 @@
 package com.elytradev.carpentrycubes.common.block;
 
-import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
-import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
+import com.elytradev.carpentrycubes.client.render.model.data.CarpentrySlopeModel;
+import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.block.prop.UnlistedEnumProperty;
 import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer.EnumToolMode;

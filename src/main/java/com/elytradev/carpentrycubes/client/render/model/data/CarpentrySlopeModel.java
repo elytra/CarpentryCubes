@@ -1,8 +1,8 @@
-package com.elytradev.carpentrycubes.client.render.model;
+package com.elytradev.carpentrycubes.client.render.model.data;
 
+import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryTransformData;
-import com.elytradev.carpentrycubes.client.render.model.builder.ICarpentryModel;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumOrientation;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope.EnumShape;
@@ -23,95 +23,92 @@ import java.util.List;
 
 public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope> {
 
-    private static CarpentrySlopeModel INSTANCE;
-    private static CarpentryModelData straightSlopeModelData;
-    private static CarpentryModelData outterSlopeModelData;
-    private static CarpentryModelData innerSlopeModelData;
+    private static CarpentrySlopeModel INSTANCE = new CarpentrySlopeModel();
+    private CarpentryModelData straightSlopeModelData;
+    private CarpentryModelData outerSlopeModelData;
+    private CarpentryModelData innerSlopeModelData;
 
+    private CarpentrySlopeModel() {
+        this.straightSlopeModelData = new CarpentryModelData(getInstance());
 
-    static {
-        INSTANCE = new CarpentrySlopeModel();
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 0);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 0);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 1);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 1);
 
-        straightSlopeModelData = new CarpentryModelData(getInstance());
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 1, 0, 0);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 0, 0, 0);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 0, 1, 1);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 1, 1, 1);
 
-        straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 0);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 0);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 1);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 1);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 0, 1);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 0, 1);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 1, 1);
+        this.straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 1, 1);
 
-        straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 1, 0, 0);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 0, 0, 0);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 0, 1, 1);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.NORTH, 1, 1, 1);
+        this.straightSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
+        this.straightSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 1);
+        this.straightSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 1, 1);
 
-        straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 0, 1);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 0, 1);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 1, 1);
-        straightSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 1, 1);
+        this.straightSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 0);
+        this.straightSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 1, 1);
+        this.straightSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 1);
 
-        straightSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
-        straightSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 1);
-        straightSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 1, 1);
+        this.outerSlopeModelData = new CarpentryModelData(getInstance());
 
-        straightSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 0);
-        straightSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 1, 1);
-        straightSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 1);
+        this.outerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 0);
+        this.outerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 0);
+        this.outerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 1);
+        this.outerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 1);
 
-        outterSlopeModelData = new CarpentryModelData(getInstance());
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 0, 0);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 1, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 0, 0);
 
-        outterSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 0);
-        outterSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 0);
-        outterSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 1);
-        outterSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.SOUTH, 0, 0, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.SOUTH, 1, 0, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.SOUTH, 1, 1, 1);
 
-        outterSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 0, 0);
-        outterSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 1, 1);
-        outterSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 0, 0);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.WEST, 1, 1, 1);
 
-        outterSlopeModelData.addTriInstruction(EnumFacing.SOUTH, 0, 0, 1);
-        outterSlopeModelData.addTriInstruction(EnumFacing.SOUTH, 1, 0, 1);
-        outterSlopeModelData.addTriInstruction(EnumFacing.SOUTH, 1, 1, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 0);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 1, 1);
+        this.outerSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 1);
 
-        outterSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
-        outterSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 1);
-        outterSlopeModelData.addTriInstruction(EnumFacing.WEST, 1, 1, 1);
+        this.innerSlopeModelData = new CarpentryModelData(getInstance());
 
-        outterSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 0);
-        outterSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 1, 1);
-        outterSlopeModelData.addTriInstruction(EnumFacing.EAST, 1, 0, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 0);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 0);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 1);
 
-        innerSlopeModelData = new CarpentryModelData(getInstance());
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 0, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 0, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 1, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 1, 1);
 
-        innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 0);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 0);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 1, 0, 1);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.DOWN, 0, 0, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 0, 0);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 1, 0);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 1, 1);
+        this.innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 0, 1);
 
-        innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 0, 1);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 0, 1);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 1, 1, 1);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.SOUTH, 0, 1, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 0, 0);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 1, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 1, 1);
 
-        innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 0, 0);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 1, 0);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 1, 1);
-        innerSlopeModelData.addQuadInstruction(EnumFacing.EAST, 1, 0, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 0, 0);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 1, 0);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 0, 0);
 
-        innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 0, 0);
-        innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 1, 1);
-        innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 1, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 1, 1, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 1, 1, 0);
 
-        innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 0, 0, 0);
-        innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 1, 0);
-        innerSlopeModelData.addTriInstruction(EnumFacing.NORTH, 1, 0, 0);
-
-        innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
-        innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 1, 1, 1);
-        innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 1, 1, 0);
-
-        innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
-        innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 1);
-        innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 1, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 0);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 0, 1);
+        this.innerSlopeModelData.addTriInstruction(EnumFacing.WEST, 0, 1, 1);
     }
 
     public static CarpentrySlopeModel getInstance() {
@@ -218,14 +215,14 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
             EnumShape shape = ((IExtendedBlockState) state).getValue(BlockCarpentrySlope.SHAPE);
             switch (shape) {
                 case STRAIGHT:
-                    return straightSlopeModelData;
+                    return this.straightSlopeModelData;
                 case INNER:
-                    return innerSlopeModelData;
+                    return this.innerSlopeModelData;
                 case OUTER:
-                    return outterSlopeModelData;
+                    return this.outerSlopeModelData;
             }
         }
-        return straightSlopeModelData;
+        return this.straightSlopeModelData;
     }
 
     @Override
@@ -235,7 +232,7 @@ public class CarpentrySlopeModel implements ICarpentryModel<BlockCarpentrySlope>
 
     @Override
     public List<BakedQuad> getDefaultModel() {
-        CarpentryModelData modelData = CarpentrySlopeModel.straightSlopeModelData;
+        CarpentryModelData modelData = this.straightSlopeModelData;
         modelData.setState(null);
         modelData.setTransform(EnumFacing.UP, TRSRTransformation.identity());
         for (int i = 0; i < EnumFacing.values().length; i++) {

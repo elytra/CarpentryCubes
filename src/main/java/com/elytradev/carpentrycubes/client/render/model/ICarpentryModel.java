@@ -1,5 +1,6 @@
-package com.elytradev.carpentrycubes.client.render.model.builder;
+package com.elytradev.carpentrycubes.client.render.model;
 
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;

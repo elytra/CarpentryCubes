@@ -1,9 +1,9 @@
 package com.elytradev.carpentrycubes.client.proxy;
 
-import com.elytradev.carpentrycubes.client.render.model.CarpentryCubeModel;
-import com.elytradev.carpentrycubes.client.render.model.CarpentrySlopeModel;
-import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryBakedModel;
-import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelLoader;
+import com.elytradev.carpentrycubes.client.render.model.data.CarpentryCubeModel;
+import com.elytradev.carpentrycubes.client.render.model.data.CarpentrySlopeModel;
+import com.elytradev.carpentrycubes.client.render.model.CarpentryBakedModel;
+import com.elytradev.carpentrycubes.client.render.model.CarpentryModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
@@ -102,9 +102,11 @@ public class ClientProxy extends CommonProxy {
     public void onModelRegistryEvent(ModelRegistryEvent event) {
         CarpentryModelLoader carpentryModelLoader = new CarpentryModelLoader();
 
+        carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrycube")),
+                (state, format, textureGetter) -> new CarpentryBakedModel(CarpentryCubeModel.getInstance()));
         carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentryslope")),
                 (state, format, textureGetter) -> new CarpentryBakedModel(CarpentrySlopeModel.getInstance()));
-        carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrycube")),
+        carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrymorphable")),
                 (state, format, textureGetter) -> new CarpentryBakedModel(CarpentryCubeModel.getInstance()));
 
         ModelLoaderRegistry.registerLoader(carpentryModelLoader);

@@ -1,5 +1,7 @@
 package com.elytradev.carpentrycubes.client.render.model.builder;
 
+import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.client.render.model.quad.CarpentryQuad;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
@@ -22,11 +24,11 @@ public class CarpentryModelData {
     private final ICarpentryModel<?> carpentryModel;
     private final Map<EnumFacing, List<CarpentryQuad>> quads = Maps.newHashMap();
 
-    private IBlockState state;
-    private EnumFacing facing = EnumFacing.NORTH;
-    private TRSRTransformation transform = TRSRTransformation.identity();
-    private ArrayList<Integer>[] tintIndices = new ArrayList[EnumFacing.values().length];
-    private ArrayList<TextureAtlasSprite>[] faceSprites = new ArrayList[EnumFacing.values().length];
+    protected IBlockState state;
+    protected EnumFacing facing = EnumFacing.NORTH;
+    protected TRSRTransformation transform = TRSRTransformation.identity();
+    protected ArrayList<Integer>[] tintIndices = new ArrayList[EnumFacing.values().length];
+    protected ArrayList<TextureAtlasSprite>[] faceSprites = new ArrayList[EnumFacing.values().length];
 
     public CarpentryModelData(ICarpentryModel<?> carpentryModel) {
         this.carpentryModel = carpentryModel;
@@ -85,7 +87,7 @@ public class CarpentryModelData {
         return new ModelDataQuads(generalQuads, faceQuads);
     }
 
-    private void setup() {
+    protected void setup() {
         // reset the model data for a new draw request.
         this.state = Blocks.AIR.getDefaultState();
         this.facing = EnumFacing.NORTH;

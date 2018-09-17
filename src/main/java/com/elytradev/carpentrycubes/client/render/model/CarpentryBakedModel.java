@@ -1,5 +1,8 @@
-package com.elytradev.carpentrycubes.client.render.model.builder;
+package com.elytradev.carpentrycubes.client.render.model;
 
+import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
+import com.elytradev.carpentrycubes.client.render.model.builder.QuadEligibilityTester;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.google.common.collect.Lists;

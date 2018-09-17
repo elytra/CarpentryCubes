@@ -1,4 +1,4 @@
-package com.elytradev.carpentrycubes.client.render.model.builder;
+package com.elytradev.carpentrycubes.client.render.model.quad;
 
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;

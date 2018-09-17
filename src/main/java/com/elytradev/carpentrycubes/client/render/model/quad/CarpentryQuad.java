@@ -1,4 +1,4 @@
-package com.elytradev.carpentrycubes.client.render.model.builder;
+package com.elytradev.carpentrycubes.client.render.model.quad;
 
 import com.elytradev.carpentrycubes.client.render.QuadBuilder;
 import com.google.common.collect.Maps;

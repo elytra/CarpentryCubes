@@ -1,4 +1,4 @@
-package com.elytradev.carpentrycubes.client.render.model.builder;
+package com.elytradev.carpentrycubes.client.render.model;
 
 import com.google.common.collect.Lists;
 import net.minecraft.client.resources.IResourceManager;
