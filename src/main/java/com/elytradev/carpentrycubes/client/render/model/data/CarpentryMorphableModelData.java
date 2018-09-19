@@ -9,6 +9,9 @@ import com.google.common.collect.Maps;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,12 +21,14 @@ import java.util.Objects;
 public class CarpentryMorphableModelData extends CarpentryModelData {
 
     private TileCarpentryMorphable tile;
-    private Map<HeightData, CarpentryQuad> cachedQuads = Maps.newHashMap();
+    private Map<SideHeightData, CarpentryQuad> cachedSideQuads = Maps.newHashMap();
+    private Map<TopHeightData, CarpentryQuad> cachedTopQuads = Maps.newHashMap();
+    private Pair<CarpentryQuad, TRSRTransformation> bottomQuad;
 
-    private class HeightData {
+    private class SideHeightData {
         final int height0, height1;
 
-        public HeightData(int height0, int height1) {
+        public SideHeightData(int height0, int height1) {
             this.height0 = height0;
             this.height1 = height1;
         }
@@ -41,7 +46,7 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            HeightData that = (HeightData) o;
+            SideHeightData that = (SideHeightData) o;
             return height0 == that.height0 &&
                     height1 == that.height1;
         }
@@ -49,6 +54,43 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
         @Override
         public int hashCode() {
             return Objects.hash(height0, height1);
+        }
+    }
+
+    private class TopHeightData {
+        final int height0, height1, height2;
+
+        public TopHeightData(int height0, int height1, int height2) {
+            this.height0 = height0;
+            this.height1 = height1;
+            this.height2 = height2;
+        }
+
+        public int getHeight0() {
+            return height0;
+        }
+
+        public int getHeight1() {
+            return height1;
+        }
+
+        public int getHeight2() {
+            return height2;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TopHeightData that = (TopHeightData) o;
+            return height0 == that.height0 &&
+                    height1 == that.height1 &&
+                    height2 == that.height2;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(height0, height1, height2);
         }
     }
 
@@ -62,19 +104,21 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
         Arrays.stream(EnumFacing.values()).forEach((o) -> faceQuads.put(o, Lists.newArrayList()));
 
         for (EnumFacing side : EnumFacing.values()) {
-            if (side.getAxis() == EnumFacing.Axis.Y)
-                continue;
+            List<Pair<CarpentryQuad, TRSRTransformation>> quadsForSide = this.getQuadsForSide(side);
+            for (Pair<CarpentryQuad, TRSRTransformation> pair : quadsForSide) {
+                CarpentryQuad quad = pair.getLeft();
+                TRSRTransformation quadTransform = pair.getRight();
 
-            CarpentryQuad quad = this.getQuadForSide(side);
-            faceQuads.putIfAbsent(side, Lists.newArrayList());
+                faceQuads.putIfAbsent(side, Lists.newArrayList());
 
-            int spritesForFace = this.faceSprites[side.getIndex()].size();
-            for (int spriteIndex = 0; spriteIndex < spritesForFace; spriteIndex++) {
-                BakedQuad builtQuad = quad.bake(TRSRTransformation.from(side), side,
-                        this.faceSprites[side.getIndex()].get(spriteIndex),
-                        this.tintIndices[side.getIndex()].get(spriteIndex));
-                generalQuads.add(builtQuad);
-                faceQuads.get(side).add(builtQuad);
+                int spritesForFace = this.faceSprites[side.getIndex()].size();
+                for (int spriteIndex = 0; spriteIndex < spritesForFace; spriteIndex++) {
+                    BakedQuad builtQuad = quad.bake(quadTransform, side,
+                            this.faceSprites[side.getIndex()].get(spriteIndex),
+                            this.tintIndices[side.getIndex()].get(spriteIndex));
+                    generalQuads.add(builtQuad);
+                    faceQuads.get(side).add(builtQuad);
+                }
             }
         }
 
@@ -88,35 +132,76 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
         super.setup();
     }
 
-    public CarpentryQuad getQuadForSide(EnumFacing side) {
-        HeightData heightData = this.getHeightDataForSide(side);
+    public List<Pair<CarpentryQuad, TRSRTransformation>> getQuadsForSide(EnumFacing side) {
+        if (side.getAxis() == EnumFacing.Axis.Y) {
+            List<Pair<CarpentryQuad, TRSRTransformation>> quadsOut = Lists.newArrayList();
+            if (side == EnumFacing.UP) {
+                for (EnumFacing topSide : Lists.newArrayList(EnumFacing.NORTH, EnumFacing.SOUTH)) {
+                    TRSRTransformation transform = TRSRTransformation.identity();
+                    TopHeightData heightData;
+                    if (topSide == EnumFacing.NORTH) {
+                        heightData = new TopHeightData(tile.getNorthWestHeight(),
+                                tile.getSouthEastHeight(),
+                                tile.getNorthEastHeight());
+                    } else {
+                        transform = TRSRTransformation.from(EnumFacing.SOUTH);
+                        heightData = new TopHeightData(tile.getSouthEastHeight(),
+                                tile.getNorthWestHeight(),
+                                tile.getSouthWestHeight());
+                    }
 
-        CarpentryQuad quadOut = this.cachedQuads.get(heightData);
-        if (quadOut == null) {
-            float calculatedHeight0 = (1F / 16F) * heightData.getHeight0();
-            float calculatedHeight1 = (1F / 16F) * heightData.getHeight1();
-            quadOut = new CarpentryQuad(EnumFacing.NORTH); // Always use north so the rotation calculations work properly.
-            quadOut.setVertex(quadOut.getNextVertex(), new float[]{0, 0, 0});
-            quadOut.setVertex(quadOut.getNextVertex(), new float[]{0, calculatedHeight1, 0});
-            quadOut.setVertex(quadOut.getNextVertex(), new float[]{1, calculatedHeight0, 0});
-            quadOut.setVertex(quadOut.getNextVertex(), new float[]{1, 0, 0});
-            this.cachedQuads.put(heightData, quadOut);
+                    CarpentryQuad quad = this.cachedTopQuads.get(heightData);
+                    if (quad == null) {
+                        quad = new CarpentryQuad(EnumFacing.UP);
+                        quad.setVertex(quad.getNextVertex(), new float[]{0, (1F / 16F) * heightData.getHeight0(), 0});
+                        quad.setVertex(quad.getNextVertex(), new float[]{0, (1F / 16F) * heightData.getHeight0(), 0});
+                        quad.setVertex(quad.getNextVertex(), new float[]{1, (1F / 16F) * heightData.getHeight1(), 1});
+                        quad.setVertex(quad.getNextVertex(), new float[]{1, (1F / 16F) * heightData.getHeight2(), 0});
+                        this.cachedTopQuads.put(heightData, quad);
+                    }
+                    quadsOut.add(new MutablePair<>(quad, transform));
+                }
+            } else {
+                if (this.bottomQuad == null) {
+                    CarpentryQuad quad = new CarpentryQuad(EnumFacing.DOWN);
+                    quad.setVertex(quad.getNextVertex(), new float[]{0, 0, 0});
+                    quad.setVertex(quad.getNextVertex(), new float[]{1, 0, 0});
+                    quad.setVertex(quad.getNextVertex(), new float[]{1, 0, 1});
+                    quad.setVertex(quad.getNextVertex(), new float[]{0, 0, 1});
+                    this.bottomQuad = new MutablePair<>(quad, TRSRTransformation.identity());
+                }
+                quadsOut.add(bottomQuad);
+            }
+            return quadsOut;
+        } else {
+            SideHeightData sideHeightData = this.getHeightDataForSide(side);
+            CarpentryQuad quadOut = this.cachedSideQuads.get(sideHeightData);
+            if (quadOut == null) {
+                float calculatedHeight0 = (1F / 16F) * sideHeightData.getHeight0();
+                float calculatedHeight1 = (1F / 16F) * sideHeightData.getHeight1();
+                quadOut = new CarpentryQuad(EnumFacing.NORTH); // Always use north so the rotation calculations work properly.
+                quadOut.setVertex(quadOut.getNextVertex(), new float[]{0, 0, 0});
+                quadOut.setVertex(quadOut.getNextVertex(), new float[]{0, calculatedHeight1, 0});
+                quadOut.setVertex(quadOut.getNextVertex(), new float[]{1, calculatedHeight0, 0});
+                quadOut.setVertex(quadOut.getNextVertex(), new float[]{1, 0, 0});
+                this.cachedSideQuads.put(sideHeightData, quadOut);
+            }
+            return Lists.newArrayList(new ImmutablePair<>(quadOut, TRSRTransformation.from(side)));
         }
-        return quadOut;
     }
 
-    public HeightData getHeightDataForSide(EnumFacing side) {
+    public SideHeightData getHeightDataForSide(EnumFacing side) {
         switch (side) {
             case NORTH:
-                return new HeightData(tile.getNorthEastHeight(), tile.getNorthWestHeight());
+                return new SideHeightData(tile.getNorthEastHeight(), tile.getNorthWestHeight());
             case WEST:
-                return new HeightData(tile.getNorthWestHeight(), tile.getSouthWestHeight());
+                return new SideHeightData(tile.getNorthWestHeight(), tile.getSouthWestHeight());
             case SOUTH:
-                return new HeightData(tile.getSouthWestHeight(), tile.getSouthEastHeight());
+                return new SideHeightData(tile.getSouthWestHeight(), tile.getSouthEastHeight());
             case EAST:
-                return new HeightData(tile.getSouthEastHeight(), tile.getNorthEastHeight());
+                return new SideHeightData(tile.getSouthEastHeight(), tile.getNorthEastHeight());
             default:
-                return new HeightData(16, 16);
+                return new SideHeightData(16, 16);
         }
     }
 
