@@ -1,8 +1,53 @@
 package com.elytradev.carpentrycubes.common.tile;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.model.TRSRTransformation;
 
 public class TileCarpentryMorphable extends TileCarpentry {
+
+    public enum BlockCorner {
+        NW(0, 1, "North-West", EnumFacing.NORTH),
+        NE(1, 0, "North-East", EnumFacing.EAST),
+        SE(2, 3, "South-East", EnumFacing.SOUTH),
+        SW(3, 2, "South-West", EnumFacing.WEST);
+
+        static BlockCorner[] corners = new BlockCorner[]{NW, NE, SE, SW};
+        static BlockCorner[] faceToCornerMap = new BlockCorner[]{SE, SW, NW, NE};
+
+        String name;
+        int index;
+        int flippedIndex;
+        EnumFacing associatedFace;
+
+        BlockCorner(int index, int flippedIndex, String name, EnumFacing associatedFace) {
+            this.index = index;
+            this.flippedIndex = flippedIndex;
+            this.name = name;
+            this.associatedFace = associatedFace;
+        }
+
+        public BlockCorner rotate(TRSRTransformation transform) {
+            EnumFacing newFace = transform.rotate(this.associatedFace);
+            if (newFace.getHorizontalIndex() == -1) {
+                return null;
+            } else {
+                return faceToCornerMap[newFace.getHorizontalIndex()];
+            }
+        }
+
+        public BlockCorner getFlipped() {
+            return corners[flippedIndex];
+        }
+
+        public static BlockCorner getCornerByIndex(int index) {
+            return corners[index];
+        }
+
+        public static BlockCorner getCornerByFace(EnumFacing face) {
+            return faceToCornerMap[face.getHorizontalIndex()];
+        }
+    }
 
     private int northWestHeight = 16;
     private int northEastHeight = 16;
@@ -78,4 +123,26 @@ public class TileCarpentryMorphable extends TileCarpentry {
     public void applyDeltaSouthEast(int delta) {
         this.setSouthEastHeight(this.getSouthEastHeight() + delta);
     }
+
+    public boolean isNormalCube() {
+        return northWestHeight == 16 && northEastHeight == 16 && southWestHeight == 16 && southEastHeight == 16;
+    }
+
+    public int getHeightFromCorner(BlockCorner corner) {
+        if (corner == null)
+            return 0;
+        switch (corner) {
+            case NW:
+                return this.getNorthWestHeight();
+            case NE:
+                return this.getNorthEastHeight();
+            case SE:
+                return this.getSouthEastHeight();
+            case SW:
+                return this.getSouthWestHeight();
+            default:
+                return 0;
+        }
+    }
+
 }

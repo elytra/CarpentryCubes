@@ -62,8 +62,7 @@ public class BlockCarpentrySlope extends BlockCarpentry {
         boolean result = super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         if (!worldIn.isRemote) {
             ItemStack heldItem = playerIn.getHeldItem(hand);
-            IBlockState blockState = worldIn.getBlockState(pos);
-            if (blockState.getBlock() instanceof BlockCarpentrySlope
+            if (state.getBlock() instanceof BlockCarpentrySlope
                     && Objects.equals(heldItem.getItem(), CarpentryContent.itemHammer)) {
 
                 EnumToolMode toolMode = EnumToolMode.byId(heldItem.getMetadata());

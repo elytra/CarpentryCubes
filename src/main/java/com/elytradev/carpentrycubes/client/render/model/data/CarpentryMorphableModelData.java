@@ -2,6 +2,7 @@ package com.elytradev.carpentrycubes.client.render.model.data;
 
 import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryTransformData;
 import com.elytradev.carpentrycubes.client.render.model.quad.CarpentryQuad;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentryMorphable;
 import com.google.common.collect.Lists;
@@ -113,7 +114,7 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
 
                 int spritesForFace = this.faceSprites[side.getIndex()].size();
                 for (int spriteIndex = 0; spriteIndex < spritesForFace; spriteIndex++) {
-                    BakedQuad builtQuad = quad.bake(quadTransform, side,
+                    BakedQuad builtQuad = quad.bake(transform.compose(quadTransform), side,
                             this.faceSprites[side.getIndex()].get(spriteIndex),
                             this.tintIndices[side.getIndex()].get(spriteIndex));
                     generalQuads.add(builtQuad);
@@ -137,17 +138,10 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
             List<Pair<CarpentryQuad, TRSRTransformation>> quadsOut = Lists.newArrayList();
             if (side == EnumFacing.UP) {
                 for (EnumFacing topSide : Lists.newArrayList(EnumFacing.NORTH, EnumFacing.SOUTH)) {
-                    TRSRTransformation transform = TRSRTransformation.identity();
-                    TopHeightData heightData;
-                    if (topSide == EnumFacing.NORTH) {
-                        heightData = new TopHeightData(tile.getNorthWestHeight(),
-                                tile.getSouthEastHeight(),
-                                tile.getNorthEastHeight());
-                    } else {
-                        transform = TRSRTransformation.from(EnumFacing.SOUTH);
-                        heightData = new TopHeightData(tile.getSouthEastHeight(),
-                                tile.getNorthWestHeight(),
-                                tile.getSouthWestHeight());
+                    TRSRTransformation quadTransform = TRSRTransformation.identity();
+                    TopHeightData heightData = getHeightDataForTop(topSide);
+                    if (topSide == EnumFacing.SOUTH) {
+                        quadTransform = TRSRTransformation.from(EnumFacing.SOUTH);
                     }
 
                     CarpentryQuad quad = this.cachedTopQuads.get(heightData);
@@ -159,7 +153,10 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
                         quad.setVertex(quad.getNextVertex(), new float[]{1, (1F / 16F) * heightData.getHeight2(), 0});
                         this.cachedTopQuads.put(heightData, quad);
                     }
-                    quadsOut.add(new MutablePair<>(quad, transform));
+                    if (requiresTriFlip()) {
+                        quadTransform = quadTransform.compose(TRSRTransformation.from(EnumFacing.EAST));
+                    }
+                    quadsOut.add(new MutablePair<>(quad, quadTransform));
                 }
             } else {
                 if (this.bottomQuad == null) {
@@ -175,6 +172,9 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
             return quadsOut;
         } else {
             SideHeightData sideHeightData = this.getHeightDataForSide(side);
+            if (sideHeightData.getHeight0() == 0 && sideHeightData.getHeight1() == 0) {
+                return Lists.newArrayList();
+            }
             CarpentryQuad quadOut = this.cachedSideQuads.get(sideHeightData);
             if (quadOut == null) {
                 float calculatedHeight0 = (1F / 16F) * sideHeightData.getHeight0();
@@ -186,23 +186,126 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
                 quadOut.setVertex(quadOut.getNextVertex(), new float[]{1, 0, 0});
                 this.cachedSideQuads.put(sideHeightData, quadOut);
             }
-            return Lists.newArrayList(new ImmutablePair<>(quadOut, TRSRTransformation.from(side)));
+            TRSRTransformation quadTransform = TRSRTransformation.from(side);
+            return Lists.newArrayList(new ImmutablePair<>(quadOut, quadTransform));
         }
     }
 
+    public TopHeightData getHeightDataForTop(EnumFacing side) {
+        TileCarpentryMorphable.BlockCorner[] selectedCorners = new TileCarpentryMorphable.BlockCorner[3];
+
+        if (side == EnumFacing.NORTH) {
+            selectedCorners[0] = TileCarpentryMorphable.BlockCorner.NW;
+            selectedCorners[1] = TileCarpentryMorphable.BlockCorner.SE;
+            selectedCorners[2] = TileCarpentryMorphable.BlockCorner.NE;
+        } else {
+            selectedCorners[0] = TileCarpentryMorphable.BlockCorner.SE;
+            selectedCorners[1] = TileCarpentryMorphable.BlockCorner.NW;
+            selectedCorners[2] = TileCarpentryMorphable.BlockCorner.SW;
+        }
+
+        EnumFacing flipFacing = EnumFacing.EAST;
+        if (this.facing == EnumFacing.DOWN) {
+            selectedCorners[0] = selectedCorners[0].getFlipped();
+            selectedCorners[1] = selectedCorners[1].getFlipped();
+            selectedCorners[2] = selectedCorners[2].getFlipped();
+            flipFacing = EnumFacing.WEST;
+        }
+
+        if (requiresTriFlip()) {
+            selectedCorners[0] = selectedCorners[0].rotate(TRSRTransformation.from(flipFacing));
+            selectedCorners[1] = selectedCorners[1].rotate(TRSRTransformation.from(flipFacing));
+            selectedCorners[2] = selectedCorners[2].rotate(TRSRTransformation.from(flipFacing));
+        }
+
+        return new TopHeightData(tile.getHeightFromCorner(selectedCorners[0]),
+                tile.getHeightFromCorner(selectedCorners[1]),
+                tile.getHeightFromCorner(selectedCorners[2]));
+    }
+
+
     public SideHeightData getHeightDataForSide(EnumFacing side) {
+        SideHeightData heightData;
+        if (this.facing == EnumFacing.DOWN) {
+            side = this.transform.rotate(side);
+        }
+
         switch (side) {
             case NORTH:
-                return new SideHeightData(tile.getNorthEastHeight(), tile.getNorthWestHeight());
+                heightData = new SideHeightData(tile.getNorthEastHeight(), tile.getNorthWestHeight());
+                break;
             case WEST:
-                return new SideHeightData(tile.getNorthWestHeight(), tile.getSouthWestHeight());
+                heightData = new SideHeightData(tile.getNorthWestHeight(), tile.getSouthWestHeight());
+                break;
             case SOUTH:
-                return new SideHeightData(tile.getSouthWestHeight(), tile.getSouthEastHeight());
+                heightData = new SideHeightData(tile.getSouthWestHeight(), tile.getSouthEastHeight());
+                break;
             case EAST:
-                return new SideHeightData(tile.getSouthEastHeight(), tile.getNorthEastHeight());
+                heightData = new SideHeightData(tile.getSouthEastHeight(), tile.getNorthEastHeight());
+                break;
             default:
-                return new SideHeightData(16, 16);
+                heightData = new SideHeightData(16, 16);
+                break;
         }
+
+        if (this.facing == EnumFacing.DOWN) {
+            heightData = new SideHeightData(heightData.getHeight1(), heightData.getHeight0());
+        }
+
+        return heightData;
+    }
+
+    public boolean requiresTriFlip() {
+        TileCarpentryMorphable.BlockCorner corner0 = TileCarpentryMorphable.BlockCorner.NW;
+        TileCarpentryMorphable.BlockCorner corner1 = TileCarpentryMorphable.BlockCorner.NE;
+        TileCarpentryMorphable.BlockCorner corner2 = TileCarpentryMorphable.BlockCorner.SW;
+        TileCarpentryMorphable.BlockCorner corner3 = TileCarpentryMorphable.BlockCorner.SE;
+
+        if (this.facing == EnumFacing.DOWN) {
+            corner0 = corner0.getFlipped();
+            corner1 = corner1.getFlipped();
+            corner2 = corner2.getFlipped();
+            corner3 = corner3.getFlipped();
+        }
+
+        int cornerValue0 = this.tile.getHeightFromCorner(corner0);
+        int cornerValue1 = this.tile.getHeightFromCorner(corner1);
+        int cornerValue2 = this.tile.getHeightFromCorner(corner2);
+        int cornerValue3 = this.tile.getHeightFromCorner(corner3);
+
+        if (cornerValue2 > cornerValue0
+                || cornerValue2 > cornerValue1
+                || cornerValue2 > cornerValue3) {
+            return true;
+        } else if (cornerValue1 > cornerValue0
+                || cornerValue1 > cornerValue2
+                || cornerValue1 > cornerValue3) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private CarpentryTransformData getTransform(EnumFacing facing) {
+        CarpentryTransformData transformOut = new CarpentryTransformData();
+        switch (facing) {
+            case DOWN:
+                transformOut.setRotation(180, 180, 0);
+                break;
+            case NORTH:
+                transformOut.setRotation(-90, 0, 0);
+                break;
+            case SOUTH:
+                transformOut.setRotation(90, 0, 0);
+                break;
+            case WEST:
+                transformOut.setRotation(0, 0, 90);
+                break;
+            case EAST:
+                transformOut.setRotation(0, 0, -90);
+                break;
+        }
+        return transformOut;
     }
 
     public void setTile(TileCarpentryMorphable tile) {

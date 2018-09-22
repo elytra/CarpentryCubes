@@ -2,6 +2,7 @@ package com.elytradev.carpentrycubes.client.render.model.data;
 
 import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
+import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryTransformData;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentryMorphable;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
@@ -33,6 +34,9 @@ public class CarpentryMorphableModel implements ICarpentryModel<BlockCarpentryMo
         if (state instanceof IExtendedBlockState) {
             TileCarpentry tile = ((IExtendedBlockState) state).getValue(BlockCarpentry.CARPENTRY_TILE);
             if (tile instanceof TileCarpentryMorphable) {
+                EnumFacing blockFacing = state.getValue(BlockCarpentryMorphable.FACING);
+                CarpentryTransformData transform = getTransform(blockFacing);
+                this.modelData.setTransform(blockFacing, transform.asTRSRTransform());
                 this.modelData.setState(state);
                 this.modelData.setTile((TileCarpentryMorphable) tile);
                 for (int i = 0; i < EnumFacing.values().length; i++) {
@@ -48,6 +52,28 @@ public class CarpentryMorphableModel implements ICarpentryModel<BlockCarpentryMo
         }
 
         return this.modelData.buildModel();
+    }
+
+    private CarpentryTransformData getTransform(EnumFacing facing) {
+        CarpentryTransformData transformOut = new CarpentryTransformData();
+        switch (facing) {
+            case DOWN:
+                transformOut.setRotation(0, 0, 180);
+                break;
+            case NORTH:
+                transformOut.setRotation(-90, 0, 0);
+                break;
+            case SOUTH:
+                transformOut.setRotation(90, 0, 0);
+                break;
+            case WEST:
+                transformOut.setRotation(0, 0, 90);
+                break;
+            case EAST:
+                transformOut.setRotation(0, 0, -90);
+                break;
+        }
+        return transformOut;
     }
 
     @Override

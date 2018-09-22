@@ -8,7 +8,10 @@ import com.elytradev.carpentrycubes.common.network.TileUpdateMessage;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentryMorphable;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -19,6 +22,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -26,8 +30,33 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class BlockCarpentryMorphable extends BlockCarpentry {
+
+    public static PropertyDirection FACING = PropertyDirection.create("facing");
+
     public BlockCarpentryMorphable(Material materialIn) {
         super(materialIn);
+    }
+
+    @Override
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+                                            float hitZ, int meta, EntityLivingBase placer) {
+        return this.getDefaultState().withProperty(FACING, facing);
+    }
+
+
+    @Override
+    protected IProperty[] getProperties() {
+        return new IProperty[]{FACING};
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+        return this.getDefaultState().withProperty(FACING, EnumFacing.values()[meta]);
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        return state.getValue(FACING).getIndex();
     }
 
     @Override
@@ -41,7 +70,6 @@ public class BlockCarpentryMorphable extends BlockCarpentry {
         boolean result = super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         if (!worldIn.isRemote) {
             ItemStack heldItem = playerIn.getHeldItem(hand);
-            IBlockState blockState = worldIn.getBlockState(pos);
             if (blockState.getBlock() instanceof BlockCarpentryMorphable
                     && Objects.equals(heldItem.getItem(), CarpentryContent.itemHammer)) {
 
@@ -51,6 +79,17 @@ public class BlockCarpentryMorphable extends BlockCarpentry {
                         tileEntity instanceof TileCarpentryMorphable ? (TileCarpentryMorphable) tileEntity : null;
                 if (carpentryMorphable != null) {
                     switch (toolMode) {
+                        case ROTATE:
+                            int newRotation = state.getValue(FACING).getIndex();
+
+                            if (playerIn.isSneaking()) {
+                                newRotation = newRotation == 0 ? 5 : newRotation - 1;
+                            } else {
+                                newRotation = newRotation == 5 ? 0 : newRotation + 1;
+                            }
+                            worldIn.setBlockState(pos, state.withProperty(FACING, EnumFacing.byIndex(newRotation)));
+                            result = true;
+                            break;
                         case TWEAK:
                             int heightDelta = (playerIn.isSneaking() ? -1 : 1);
 
@@ -73,7 +112,7 @@ public class BlockCarpentryMorphable extends BlockCarpentry {
                                     carpentryMorphable.applyDeltaSouthEast(heightDelta);
                                 }
                             }
-
+                            result = true;
                             break;
                         default:
                             break;
@@ -92,16 +131,42 @@ public class BlockCarpentryMorphable extends BlockCarpentry {
 
     @Override
     public boolean isFullBlock(IBlockState state) {
+        if (state instanceof IExtendedBlockState) {
+            TileCarpentry stateTile = ((IExtendedBlockState) state).getValue(BlockCarpentry.CARPENTRY_TILE);
+            if (stateTile instanceof TileCarpentryMorphable) {
+                TileCarpentryMorphable tile = (TileCarpentryMorphable) stateTile;
+                int northWestHeight = tile.getNorthWestHeight();
+                int northEastHeight = tile.getNorthEastHeight();
+                int southWestHeight = tile.getSouthWestHeight();
+                int southEastHeight = tile.getSouthEastHeight();
+                return northWestHeight == 16 && northEastHeight == 16 && southWestHeight == 16 && southEastHeight == 16;
+            }
+        }
+
         return false;
     }
 
     @Override
     public boolean isFullCube(IBlockState state) {
+        if (state instanceof IExtendedBlockState) {
+            TileCarpentry stateTile = ((IExtendedBlockState) state).getValue(BlockCarpentry.CARPENTRY_TILE);
+            if (stateTile instanceof TileCarpentryMorphable) {
+                return ((TileCarpentryMorphable) stateTile).isNormalCube();
+            }
+        }
+
         return false;
     }
 
     @Override
     public boolean isOpaqueCube(IBlockState state) {
+        if (state instanceof IExtendedBlockState) {
+            TileCarpentry stateTile = ((IExtendedBlockState) state).getValue(BlockCarpentry.CARPENTRY_TILE);
+            if (stateTile instanceof TileCarpentryMorphable) {
+                boolean isCoverOpaque = stateTile.hasCoverState() && stateTile.getCoverState().isOpaqueCube();
+                return ((TileCarpentryMorphable) stateTile).isNormalCube() && isCoverOpaque;
+            }
+        }
         return false;
     }
 
@@ -116,6 +181,12 @@ public class BlockCarpentryMorphable extends BlockCarpentry {
         }
 
         return super.shouldSideBeRendered(state, access, pos, side);
+    }
+
+
+    @Override
+    public boolean isTopSolid(IBlockState state) {
+        return super.isTopSolid(state);
     }
 
     @Nullable
