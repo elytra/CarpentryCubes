@@ -273,13 +273,9 @@ public class CarpentryMorphableModelData extends CarpentryModelData {
         int cornerValue2 = this.tile.getHeightFromCorner(corner2);
         int cornerValue3 = this.tile.getHeightFromCorner(corner3);
 
-        if (cornerValue2 > cornerValue0
-                || cornerValue2 > cornerValue1
-                || cornerValue2 > cornerValue3) {
+        if (cornerValue2 > cornerValue0 && cornerValue2 > cornerValue1 && cornerValue2 > cornerValue3) {
             return true;
-        } else if (cornerValue1 > cornerValue0
-                || cornerValue1 > cornerValue2
-                || cornerValue1 > cornerValue3) {
+        } else if (cornerValue1 > cornerValue0 && cornerValue1 > cornerValue2 && cornerValue1 > cornerValue3) {
             return true;
         }
 
