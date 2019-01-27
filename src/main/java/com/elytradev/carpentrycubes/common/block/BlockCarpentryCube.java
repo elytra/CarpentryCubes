@@ -1,7 +1,7 @@
 package com.elytradev.carpentrycubes.common.block;
 
-import com.elytradev.carpentrycubes.client.render.model.data.CarpentryCubeModel;
 import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
+import com.elytradev.carpentrycubes.client.render.model.data.CarpentryCubeModel;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 

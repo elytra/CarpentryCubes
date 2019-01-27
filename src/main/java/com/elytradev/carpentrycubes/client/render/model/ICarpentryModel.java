@@ -2,6 +2,7 @@ package com.elytradev.carpentrycubes.client.render.model;
 
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
+import com.elytradev.carpentrycubes.common.block.IBlockCarpentry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -14,7 +15,7 @@ import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface ICarpentryModel<B extends BlockCarpentry> {
+public interface ICarpentryModel<B extends IBlockCarpentry> {
 
 
     CarpentryModelData.ModelDataQuads getQuads(IBlockState state, IBlockAccess access, BlockPos pos,

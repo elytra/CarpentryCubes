@@ -1,11 +1,9 @@
 package com.elytradev.carpentrycubes.common;
 
-import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
-import com.elytradev.carpentrycubes.common.block.BlockCarpentryCube;
-import com.elytradev.carpentrycubes.common.block.BlockCarpentryMorphable;
-import com.elytradev.carpentrycubes.common.block.BlockCarpentrySlope;
+import com.elytradev.carpentrycubes.common.block.*;
 import com.elytradev.carpentrycubes.common.item.ItemCarpentryHammer;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
+import com.elytradev.carpentrycubes.common.tile.TileCarpentryDoor;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentryMorphable;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentrySlope;
 import net.minecraft.block.Block;
@@ -14,6 +12,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
@@ -44,8 +43,10 @@ public class CarpentryContent {
     public static BlockCarpentry blockCube;
     public static BlockCarpentrySlope blockSlope;
     public static BlockCarpentryMorphable blockMorphable;
+    public static BlockCarpentryDoor blockDoor;
 
     public static ItemCarpentryHammer itemHammer;
+    public static ItemDoor itemDoor;
 
     private static List<Item> itemBlocksToRegister;
     public int recipeID = 0;
@@ -68,6 +69,7 @@ public class CarpentryContent {
         GameRegistry.registerTileEntity(TileCarpentry.class, REGISTRY_PREFIX + ":" + "tileCarpentry");
         GameRegistry.registerTileEntity(TileCarpentrySlope.class, REGISTRY_PREFIX + ":" + "tileCarpentrySlope");
         GameRegistry.registerTileEntity(TileCarpentryMorphable.class, REGISTRY_PREFIX + ":" + "tileCarpentryMorphable");
+        GameRegistry.registerTileEntity(TileCarpentryDoor.class, REGISTRY_PREFIX + ":" + "tileCarpentryMorphable");
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -92,6 +94,9 @@ public class CarpentryContent {
 
         blockMorphable = new BlockCarpentryMorphable(Material.WOOD);
         registerBlock(registry, "carpentryMorphable", blockMorphable, true);
+
+        blockDoor = new BlockCarpentryDoor(Material.WOOD);
+        registerBlock(registry, "carpentryDoor", blockDoor, false);
     }
 
     @SubscribeEvent
@@ -103,6 +108,9 @@ public class CarpentryContent {
 
         itemHammer = new ItemCarpentryHammer();
         registerItem(registry, "carpentryTool", itemHammer);
+
+        itemDoor = new ItemDoor(blockDoor);
+        registerItem(registry, "carpentryDoor", itemDoor);
     }
 
     private void registerShapedRecipe(IForgeRegistry<IRecipe> registry, ItemStack out, Object... input) {

@@ -4,6 +4,7 @@ import com.elytradev.carpentrycubes.client.render.model.ICarpentryModel;
 import com.elytradev.carpentrycubes.client.render.model.builder.CarpentryModelData;
 import com.elytradev.carpentrycubes.client.render.model.builder.QuadEligibilityTester;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
+import com.elytradev.carpentrycubes.common.block.IBlockCarpentry;
 import com.elytradev.carpentrycubes.common.tile.TileCarpentry;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
@@ -70,9 +71,9 @@ public class CarpentryBakedModel implements IBakedModel {
 
     @Override
     public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-        if (state != null && state.getBlock() instanceof BlockCarpentry) {
-            BlockCarpentry block = (BlockCarpentry) state.getBlock();
-            ICarpentryModel<? extends BlockCarpentry> carpentryModel = block.getModel();
+        if (state != null && state.getBlock() instanceof IBlockCarpentry) {
+            IBlockCarpentry block = (IBlockCarpentry) state.getBlock();
+            ICarpentryModel<? extends IBlockCarpentry> carpentryModel = block.getModel();
             IExtendedBlockState extendedState = (IExtendedBlockState) state;
             TileCarpentry tile = extendedState.getValue(BlockCarpentry.CARPENTRY_TILE);
             IBlockState coverState = tile.getCoverState();
@@ -98,7 +99,7 @@ public class CarpentryBakedModel implements IBakedModel {
         }
     }
 
-    private void gatherQuadData(long rand, ICarpentryModel<? extends BlockCarpentry> carpentryModel,
+    private void gatherQuadData(long rand, ICarpentryModel<? extends IBlockCarpentry> carpentryModel,
                                 IBlockState coverState, IBakedModel modelForState,
                                 ArrayList<Integer>[] tintIndices,
                                 ArrayList<TextureAtlasSprite>[] faceSprites,

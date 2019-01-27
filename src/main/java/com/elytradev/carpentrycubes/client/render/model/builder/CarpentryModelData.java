@@ -6,11 +6,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.model.TRSRTransformation;
 
+import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +38,11 @@ public class CarpentryModelData {
             tintIndices[i] = Lists.newArrayList();
             faceSprites[i] = Lists.newArrayList();
         }
+    }
+
+    public CarpentryModelData(ICarpentryModel<?> carpentryModel, IBakedModel sourceData) {
+        this(carpentryModel);
+        this.loadFromBakedModel(sourceData);
     }
 
     public void setFaceData(int quadNumber, EnumFacing side, TextureAtlasSprite sprite, int tintIndex) {
@@ -98,6 +105,23 @@ public class CarpentryModelData {
         for (int i = 0; i < tintIndices.length; i++) {
             tintIndices[i] = Lists.newArrayList();
             faceSprites[i] = Lists.newArrayList();
+        }
+    }
+
+    public void loadFromBakedModel(IBakedModel sourceData) {
+        for (int i = -1; i < EnumFacing.values().length; i++) {
+            EnumFacing facing = null;
+            if (i != -1) {
+                facing = EnumFacing.byIndex(i);
+            }
+            List<BakedQuad> quads = sourceData.getQuads(Blocks.AIR.getDefaultState(), facing, 0);
+
+            for (BakedQuad quad : quads) {
+                Vector3f[] points = new QuadPointDumper(quad).getPoints();
+                for (Vector3f point : points) {
+                    this.addQuadInstruction(quad.getFace(), point.x, point.y, point.z);
+                }
+            }
         }
     }
 

@@ -1,10 +1,13 @@
 package com.elytradev.carpentrycubes.client.proxy;
 
 import com.elytradev.carpentrycubes.client.render.model.data.CarpentryCubeModel;
+import com.elytradev.carpentrycubes.client.render.model.data.CarpentryDoorModel;
+import com.elytradev.carpentrycubes.client.render.model.data.CarpentryMorphableModel;
 import com.elytradev.carpentrycubes.client.render.model.data.CarpentrySlopeModel;
 import com.elytradev.carpentrycubes.client.render.model.CarpentryBakedModel;
 import com.elytradev.carpentrycubes.client.render.model.CarpentryModelLoader;
 import com.elytradev.carpentrycubes.common.CarpentryContent;
+import com.elytradev.carpentrycubes.common.CarpentryLog;
 import com.elytradev.carpentrycubes.common.CarpentryMod;
 import com.elytradev.carpentrycubes.common.block.BlockCarpentry;
 import com.elytradev.carpentrycubes.common.proxy.CommonProxy;
@@ -14,15 +17,21 @@ import com.elytradev.concrete.resgen.IResourceHolder;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.model.TRSRTransformation;
 import net.minecraftforge.fml.common.LoaderState;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -96,10 +105,12 @@ public class ClientProxy extends CommonProxy {
 
     @SubscribeEvent
     public void onModelBakeEvent(ModelBakeEvent e) {
+
     }
 
     @SubscribeEvent
     public void onModelRegistryEvent(ModelRegistryEvent event) {
+
         CarpentryModelLoader carpentryModelLoader = new CarpentryModelLoader();
 
         carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrycube")),
@@ -108,6 +119,8 @@ public class ClientProxy extends CommonProxy {
                 (state, format, textureGetter) -> new CarpentryBakedModel(CarpentrySlopeModel.getInstance()));
         carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrymorphable")),
                 (state, format, textureGetter) -> new CarpentryBakedModel(CarpentryCubeModel.getInstance()));
+        carpentryModelLoader.registerModel((resourceLocation -> resourceLocation.getPath().startsWith("carpentrydoor")),
+                (state, format, textureGetter) -> new CarpentryBakedModel(CarpentryDoorModel.getInstance()));
 
         ModelLoaderRegistry.registerLoader(carpentryModelLoader);
     }

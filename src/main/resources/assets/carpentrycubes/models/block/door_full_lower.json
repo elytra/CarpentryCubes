@@ -3,14 +3,14 @@
 		{
 			"from": [0, 0, 0],
 			"to": [16, 16, 3],
-			"rotation": {"angle": 0, "axis": "y", "origin": [8, 16, 0.5]},
+			"color": 3,
 			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#missing"},
-				"east": {"uv": [0, 0, 3, 16], "texture": "#missing"},
-				"south": {"uv": [0, 0, 16, 16], "texture": "#missing"},
-				"west": {"uv": [0, 0, 3, 16], "texture": "#missing"},
-				"up": {"uv": [0, 0, 16, 3], "texture": "#missing", "cullface": "up"},
-				"down": {"uv": [0, 0, 16, 3], "texture": "#missing"}
+				"north": {"uv": [0, 0, 16, 16], "texture": "blocks/stone"},
+				"east": {"uv": [0, 0, 3, 16], "texture": "blocks/stone"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "blocks/stone"},
+				"west": {"uv": [0, 0, 3, 16], "texture": "blocks/stone"},
+				"up": {"uv": [0, 0, 16, 3], "texture": "blocks/stone", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 3], "texture": "blocks/stone"}
 			}
 		}
 	]
